@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "منبر الجمعة — The Friday Pulpit"
+version = "1.0.0"
+id = "artifacts/khutbah"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18518
+
+[services.development]
+run = "pnpm --filter @workspace/khutbah run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/khutbah", "run", "build" ]
+publicDir = "artifacts/khutbah/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18518"
+BASE_PATH = "/"

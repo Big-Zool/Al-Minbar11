@@ -3,13 +3,22 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for منبر الجمعة (The Friday Pulpit)
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: khutbahs
+    description: Khutbah (sermon) operations
+  - name: settings
+    description: Site settings and about text
+  - name: admin
+    description: Admin authentication
+  - name: translate
+    description: AI translation
+
 paths:
   /healthz:
     get:
@@ -24,6 +33,228 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /khutbahs:
+    get:
+      operationId: listKhutbahs
+      tags: [khutbahs]
+      summary: List all khutbahs
+      description: Returns all khutbahs ordered by date descending
+      responses:
+        "200":
+          description: List of khutbahs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Khutbah"
+    post:
+      operationId: createKhutbah
+      tags: [khutbahs]
+      summary: Create a new khutbah
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KhutbahInput"
+      responses:
+        "201":
+          description: Created khutbah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Khutbah"
+        "400":
+          description: Bad request
+
+  /khutbahs/current:
+    get:
+      operationId: getCurrentKhutbah
+      tags: [khutbahs]
+      summary: Get the current khutbah
+      description: Returns the khutbah marked as current, or the most recent by date
+      responses:
+        "200":
+          description: Current khutbah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Khutbah"
+        "404":
+          description: No khutbahs found
+
+  /khutbahs/archive:
+    get:
+      operationId: getKhutbahArchive
+      tags: [khutbahs]
+      summary: Get archived khutbahs
+      description: Returns all non-current khutbahs ordered by date descending
+      responses:
+        "200":
+          description: Archive list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Khutbah"
+
+  /khutbahs/{id}:
+    get:
+      operationId: getKhutbah
+      tags: [khutbahs]
+      summary: Get a single khutbah
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Khutbah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Khutbah"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateKhutbah
+      tags: [khutbahs]
+      summary: Update a khutbah
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KhutbahUpdate"
+      responses:
+        "200":
+          description: Updated khutbah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Khutbah"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteKhutbah
+      tags: [khutbahs]
+      summary: Delete a khutbah
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get site settings
+      description: Returns about text in all languages
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update site settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+
+  /admin/verify:
+    post:
+      operationId: verifyAdminPassword
+      tags: [admin]
+      summary: Verify admin password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPasswordInput"
+      responses:
+        "200":
+          description: Password verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminVerifyResult"
+        "401":
+          description: Invalid password
+
+  /admin/password:
+    patch:
+      operationId: changeAdminPassword
+      tags: [admin]
+      summary: Change admin password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPasswordChange"
+      responses:
+        "200":
+          description: Password changed
+        "401":
+          description: Current password incorrect
+
+  /translate:
+    post:
+      operationId: translateKhutbah
+      tags: [translate]
+      summary: Translate khutbah text using AI
+      description: Translates Arabic title and body into English, Turkish, French, Urdu, and Farsi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslationInput"
+      responses:
+        "200":
+          description: Translations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslationResult"
+        "401":
+          description: Unauthorized
+        "500":
+          description: Translation failed
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +265,131 @@ components:
       required:
         - status
 
+    MultilingualText:
+      type: object
+      description: Text in all 6 supported languages
+      properties:
+        ar: { type: string }
+        en: { type: string }
+        tr: { type: string }
+        fr: { type: string }
+        ur: { type: string }
+        fa: { type: string }
+      required: [ar, en, tr, fr, ur, fa]
+
+    Khutbah:
+      type: object
+      properties:
+        id: { type: integer }
+        date: { type: string, format: date-time }
+        isCurrent: { type: boolean }
+        title:
+          $ref: "#/components/schemas/MultilingualText"
+        body:
+          $ref: "#/components/schemas/MultilingualText"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, date, isCurrent, title, body, createdAt, updatedAt]
+
+    KhutbahInput:
+      type: object
+      properties:
+        date: { type: string, format: date-time }
+        isCurrent: { type: boolean }
+        titleAr: { type: string }
+        titleEn: { type: string }
+        titleTr: { type: string }
+        titleFr: { type: string }
+        titleUr: { type: string }
+        titleFa: { type: string }
+        bodyAr: { type: string }
+        bodyEn: { type: string }
+        bodyTr: { type: string }
+        bodyFr: { type: string }
+        bodyUr: { type: string }
+        bodyFa: { type: string }
+      required: [date, titleAr, titleEn, titleTr, titleFr, titleUr, titleFa, bodyAr, bodyEn, bodyTr, bodyFr, bodyUr, bodyFa]
+
+    KhutbahUpdate:
+      type: object
+      properties:
+        date: { type: string, format: date-time }
+        isCurrent: { type: boolean }
+        titleAr: { type: string }
+        titleEn: { type: string }
+        titleTr: { type: string }
+        titleFr: { type: string }
+        titleUr: { type: string }
+        titleFa: { type: string }
+        bodyAr: { type: string }
+        bodyEn: { type: string }
+        bodyTr: { type: string }
+        bodyFr: { type: string }
+        bodyUr: { type: string }
+        bodyFa: { type: string }
+
+    Settings:
+      type: object
+      properties:
+        id: { type: integer }
+        aboutAr: { type: string }
+        aboutEn: { type: string }
+        aboutTr: { type: string }
+        aboutFr: { type: string }
+        aboutUr: { type: string }
+        aboutFa: { type: string }
+      required: [id, aboutAr, aboutEn, aboutTr, aboutFr, aboutUr, aboutFa]
+
+    SettingsUpdate:
+      type: object
+      properties:
+        aboutAr: { type: string }
+        aboutEn: { type: string }
+        aboutTr: { type: string }
+        aboutFr: { type: string }
+        aboutUr: { type: string }
+        aboutFa: { type: string }
+        currentPassword: { type: string }
+        newPassword: { type: string }
+
+    AdminPasswordInput:
+      type: object
+      properties:
+        password: { type: string }
+      required: [password]
+
+    AdminVerifyResult:
+      type: object
+      properties:
+        valid: { type: boolean }
+      required: [valid]
+
+    AdminPasswordChange:
+      type: object
+      properties:
+        currentPassword: { type: string }
+        newPassword: { type: string }
+      required: [currentPassword, newPassword]
+
+    TranslationInput:
+      type: object
+      properties:
+        titleAr: { type: string }
+        bodyAr: { type: string }
+        adminPassword: { type: string }
+      required: [titleAr, bodyAr, adminPassword]
+
+    TranslationResult:
+      type: object
+      properties:
+        titleEn: { type: string }
+        titleTr: { type: string }
+        titleFr: { type: string }
+        titleUr: { type: string }
+        titleFa: { type: string }
+        bodyEn: { type: string }
+        bodyTr: { type: string }
+        bodyFr: { type: string }
+        bodyUr: { type: string }
+        bodyFa: { type: string }
+      required: [titleEn, titleTr, titleFr, titleUr, titleFa, bodyEn, bodyTr, bodyFr, bodyUr, bodyFa]

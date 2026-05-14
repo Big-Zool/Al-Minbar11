@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Lato:wght@300;400;700;900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-amiri: var(--app-font-amiri);
+}
+
+:root {
+  --background: 43 38% 95%; /* #F9F5EC */
+  --foreground: 143 48% 10%; /* Very dark green almost black */
+  
+  --border: 43 20% 85%;
+  --input: 43 20% 85%;
+  --ring: 143 48% 20%;
+
+  --card: 43 40% 98%;
+  --card-foreground: 143 48% 10%;
+  --card-border: 43 20% 85%;
+
+  --popover: 43 40% 98%;
+  --popover-foreground: 143 48% 10%;
+  --popover-border: 43 20% 85%;
+
+  --primary: 143 48% 20%; /* #1B4D2E */
+  --primary-foreground: 43 38% 95%;
+  
+  --secondary: 44 55% 54%; /* #C9A84C */
+  --secondary-foreground: 143 48% 10%;
+
+  --muted: 43 20% 90%;
+  --muted-foreground: 143 20% 40%;
+
+  --accent: 44 55% 54%;
+  --accent-foreground: 43 38% 95%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --app-font-sans: 'Lato', sans-serif;
+  --app-font-serif: 'Amiri', serif;
+  --app-font-amiri: 'Amiri', serif;
+  
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 143 48% 10%;
+  --foreground: 43 38% 95%;
+  
+  --border: 143 30% 20%;
+  --input: 143 30% 20%;
+  --ring: 44 55% 54%;
+
+  --card: 143 40% 15%;
+  --card-foreground: 43 38% 95%;
+  --card-border: 143 30% 20%;
+
+  --popover: 143 40% 15%;
+  --popover-foreground: 43 38% 95%;
+  --popover-border: 143 30% 20%;
+
+  --primary: 44 55% 54%;
+  --primary-foreground: 143 48% 10%;
+  
+  --secondary: 143 48% 20%;
+  --secondary-foreground: 43 38% 95%;
+
+  --muted: 143 30% 20%;
+  --muted-foreground: 43 20% 70%;
+
+  --accent: 44 55% 54%;
+  --accent-foreground: 143 48% 10%;
+
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 43 38% 95%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  [dir="rtl"] {
+    font-family: var(--app-font-amiri);
+  }
+}
+
+.pattern-zellige {
+  background-color: hsl(var(--background));
+  background-image: radial-gradient(hsl(var(--primary) / 0.05) 2px, transparent 2px), radial-gradient(hsl(var(--primary) / 0.05) 2px, transparent 2px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+.pattern-border {
+  height: 12px;
+  width: 100%;
+  background-image: 
+    linear-gradient(45deg, hsl(var(--secondary)) 25%, transparent 25%, transparent 75%, hsl(var(--secondary)) 75%, hsl(var(--secondary))),
+    linear-gradient(45deg, hsl(var(--secondary)) 25%, transparent 25%, transparent 75%, hsl(var(--secondary)) 75%, hsl(var(--secondary)));
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+  opacity: 0.3;
+}
