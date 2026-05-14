@@ -470,6 +470,27 @@ export function Home() {
                 </div>
               ))}
             </div>
+
+            <div className="mt-8 rounded-xl p-6" style={{ background: "#f0ece4", border: "1px solid rgba(196,200,188,0.4)" }}>
+              <h3 className="font-body font-bold text-sm mb-4 flex items-center gap-2" style={{ color: "#4a7c59" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
+                {rtl ? "تواصل مع الإمام" : "Contact the Imam"}
+              </h3>
+              <div className="space-y-3">
+                <a href="mailto:bashmohandes04@gmail.com" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>mail</span>
+                  bashmohandes04@gmail.com
+                </a>
+                <a href="https://instagram.com/kpzlz" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>link</span>
+                  Instagram: @kpzlz
+                </a>
+                <div className="flex items-center gap-3 font-body text-sm" style={{ color: "#74796e" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>web</span>
+                  {rtl ? "الموقع الشخصي: سيتم إضافته لاحقاً" : "Portfolio: Coming soon"}
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       )}
