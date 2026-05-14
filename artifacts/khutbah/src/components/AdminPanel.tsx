@@ -45,7 +45,7 @@ export function AdminPanel({ password, onClose }: { password: string; onClose: (
           </TabsContent>
 
           <TabsContent value="manage">
-            <ManageKhutbahs />
+            <ManageKhutbahs password={password} />
           </TabsContent>
 
           <TabsContent value="settings">
@@ -141,11 +141,9 @@ function KhutbahForm({ password, onSuccess, initialData }: { password?: string; 
           <Label>Body</Label>
           <Textarea value={formData.bodyAr} onChange={e => setFormData(p => ({ ...p, bodyAr: e.target.value }))} dir="rtl" rows={5} required />
         </div>
-        {!initialData && (
-          <Button type="button" variant="secondary" onClick={handleTranslate} disabled={translating}>
-            {translating ? "Translating..." : "Auto-Translate to All Languages"}
-          </Button>
-        )}
+        <Button type="button" variant="secondary" onClick={handleTranslate} disabled={translating}>
+          {translating ? "Translating..." : "Auto-Translate to All Languages"}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,7 +163,7 @@ function KhutbahForm({ password, onSuccess, initialData }: { password?: string; 
   );
 }
 
-function ManageKhutbahs() {
+function ManageKhutbahs({ password }: { password: string }) {
   const { data: khutbahs, isLoading } = useListKhutbahs();
   const deleteMutation = useDeleteKhutbah();
   const queryClient = useQueryClient();
@@ -176,6 +174,7 @@ function ManageKhutbahs() {
       <div className="pt-4 space-y-4">
         <Button variant="ghost" onClick={() => setEditing(null)}>← Back to list</Button>
         <KhutbahForm 
+          password={password}
           initialData={editing} 
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: getListKhutbahsQueryKey() });
