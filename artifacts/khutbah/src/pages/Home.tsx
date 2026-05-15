@@ -468,7 +468,7 @@ export function Home() {
                   <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>link</span>
                   Instagram: @kpzlz
                 </a>
-                <a href="https://github.com/Big-Zool/portfolio.git" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
+                <a href="https://big-zool.github.io/portfolio" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>web</span>
                   {rtl ? "الموقع الشخصي" : "Portfolio"}
                 </a>
