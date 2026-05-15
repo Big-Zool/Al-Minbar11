@@ -247,23 +247,6 @@ export function Home() {
                 </div>
               </div>
 
-              <div className="rounded-2xl overflow-hidden relative h-52 group cursor-pointer">
-                <div className="absolute inset-0" style={{
-                  background: "linear-gradient(135deg, #4a7c59 0%, #3d6b4b 50%, #2d5237 100%)"
-                }}>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                    <span className="material-symbols-outlined" style={{ fontSize: 120, color: "#ffffff", fontVariationSettings: "'FILL' 1" }}>mosque</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex flex-col justify-end p-6" style={{ background: "linear-gradient(to top, rgba(26,45,32,0.85) 0%, transparent 60%)" }}>
-                  <p className="font-headline font-bold text-base" style={{ color: "#ffffff" }}>
-                    {rtl ? "انضم إلى مجتمعنا" : "Join our community"}
-                  </p>
-                  <p className="font-body text-xs mt-1" style={{ color: "rgba(255,255,255,0.75)" }}>
-                    {rtl ? "اشترك للحصول على التحديثات الأسبوعية" : "Subscribe for weekly updates."}
-                  </p>
-                </div>
-              </div>
             </aside>
 
             {/* Right: parchment article */}
@@ -474,7 +457,7 @@ export function Home() {
             <div className="mt-8 rounded-xl p-6" style={{ background: "#f0ece4", border: "1px solid rgba(196,200,188,0.4)" }}>
               <h3 className="font-body font-bold text-sm mb-4 flex items-center gap-2" style={{ color: "#4a7c59" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
-                {rtl ? "تواصل مع الإمام" : "Contact the Imam"}
+                {rtl ? "تواصل معي" : "Contact with me"}
               </h3>
               <div className="space-y-3">
                 <a href="mailto:bashmohandes04@gmail.com" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
@@ -485,10 +468,10 @@ export function Home() {
                   <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>link</span>
                   Instagram: @kpzlz
                 </a>
-                <div className="flex items-center gap-3 font-body text-sm" style={{ color: "#74796e" }}>
+                <a href="https://github.com/Big-Zool/portfolio.git" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>web</span>
-                  {rtl ? "الموقع الشخصي: سيتم إضافته لاحقاً" : "Portfolio: Coming soon"}
-                </div>
+                  {rtl ? "الموقع الشخصي" : "Portfolio"}
+                </a>
               </div>
             </div>
           </div>
@@ -505,18 +488,21 @@ export function Home() {
             </p>
           </div>
           <div className="flex gap-6 font-body text-xs" style={{ color: "#74796e" }}>
-            <a href="#" className="hover:text-[#4a7c59] transition-colors">
+            <span className="hover:text-[#4a7c59] transition-colors cursor-default">
               {rtl ? "سياسة الخصوصية" : "Privacy Policy"}
-            </a>
-            <a href="#" className="hover:text-[#4a7c59] transition-colors">
-              {rtl ? "شروط الاستخدام" : "Terms of Service"}
-            </a>
-            <a href="#" className="hover:text-[#4a7c59] transition-colors">
+            </span>
+            <span className="hover:text-[#4a7c59] transition-colors cursor-default">
+              {rtl ? "شروط الاستخدام" : "Terms of Use"}
+            </span>
+            <button
+              onClick={() => setView("about")}
+              className="hover:text-[#4a7c59] transition-colors"
+            >
               {rtl ? "تواصل معنا" : "Contact Us"}
-            </a>
+            </button>
           </div>
           <p className="font-body text-xs" style={{ color: "#74796e" }}>
-            © 2024 Al-Minbar Sermons.
+            © 2026 Al-Minbar Sermons.
           </p>
         </div>
       </footer>
