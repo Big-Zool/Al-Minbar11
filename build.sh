@@ -19,10 +19,6 @@ echo "==> Building API server"
 pnpm --filter @workspace/api-server run build
 
 echo "==> Copying frontend into built API dist"
-mkdir -p artifacts/api-server/dist/public
 cp -r artifacts/khutbah/dist/public/* artifacts/api-server/dist/public/
-
-echo "==> Running DB migrations"
-pnpm --filter @workspace/db run push
 
 echo "Build complete!"
