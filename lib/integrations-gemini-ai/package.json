@@ -1,0 +1,12 @@
+{
+  "name": "@workspace/integrations-gemini-ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  }
+}

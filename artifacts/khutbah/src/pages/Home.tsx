@@ -3,6 +3,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Language, isRTL, formatDate } from "@/lib/language";
 import { useGetSettings, useGetCurrentKhutbah, useListKhutbahs } from "@workspace/api-client-react";
+import type { Khutbah } from "@workspace/api-client-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -99,6 +100,52 @@ const viewLabels = {
   about: { en: "About", ar: "عن الموقع" },
 };
 
+const footerTranslations: Record<"privacy" | "terms" | "contact", Record<Language, string>> = {
+  privacy: {
+    ar: "سياسة الخصوصية",
+    en: "Privacy Policy",
+    tr: "Gizlilik Politikası",
+    fr: "Politique de confidentialité",
+    ur: "رازداری کی پالیسی",
+    fa: "حریم خصوصی",
+  },
+  terms: {
+    ar: "شروط الاستخدام",
+    en: "Terms of Use",
+    tr: "Kullanım Koşulları",
+    fr: "Conditions d'utilisation",
+    ur: "استعمال کی شرائط",
+    fa: "شرایط استفاده",
+  },
+  contact: {
+    ar: "تواصل معنا",
+    en: "Contact Us",
+    tr: "Bize Ulaşın",
+    fr: "Contactez-nous",
+    ur: "ہم سے رابطہ کریں",
+    fa: "تماس با ما",
+  },
+};
+
+const policyContents: Record<"privacy" | "terms", Record<Language, string>> = {
+  privacy: {
+    ar: "موقع منبر الجمعة يحترم خصوصيتكم. نحن لا نجمع أو نخزن أي بيانات شخصية من زوارنا. ملفات تعريف الارتباط (Cookies) تُستخدم فقط لحفظ خيارات اللغة المفضلة محلياً على جهازكم.",
+    en: "Al-Minbar Sermons website respects your privacy. We do not collect, share, or store any personal data from our visitors. Cookies are only used locally to save your language preference.",
+    tr: "Al-Minbar Vaazları web sitesi gizliliğinize saygı duyar. Ziyaretçilerimizden herhangi bir kişisel veri toplamıyoruz, paylaşmıyoruz veya saklamıyoruz. Çerezler yalnızca dil tercihinizi yerel olarak kaydetmek için kullanılır.",
+    fr: "Le site Al-Minbar respecte votre vie privée. Nous ne collectons, ne partageons ni ne stockons aucune donnée personnelle de nos visiteurs. Les cookies sont uniquement utilisés localement pour enregistrer vos préférences de langue.",
+    ur: "منبر الجمعہ ویب سائٹ آپ کی پرائیویسی کا احترام کرتی ہے۔ ہم اپنے زائرین سے کوئی ذاتی معلومات جمع، شیئر یا محفوظ نہیں کرتے ہیں۔ کوکیز صرف مقامی طور پر آپ کی زبان کی ترجیح کو محفوظ کرنے کے لیے استعمال ہوتی ہیں۔",
+    fa: "وب‌سایت منبر جمعه به حریم خصوصی شما احترام می‌گذارد. ما هیچ‌گونه داده شخصی از بازدیدکنندگان خود جمع‌آوری، اشتراک‌گذاری یا ذخیره نمی‌کنیم. کوکی‌ها فقط برای ذخیره تنظیمات زبان شما به صورت محلی استفاده می‌شوند.",
+  },
+  terms: {
+    ar: "المحتوى المنشور على منبر الجمعة مخصص للاستخدام الشخصي والتعليمي والدعوي. يرجى الإشارة إلى المصدر عند مشاركة أو نقل النصوص. الاستخدام التجاري غير مصرح به بدون إذن خطي مسبق.",
+    en: "The content published on Al-Minbar is intended for personal, educational, and spiritual use. Please credit the source when sharing or quoting. Commercial use is unauthorized without prior written permission.",
+    tr: "Al-Minbar'da yayınlanan içerikler kişisel, eğitimsel ve manevi kullanım içindir. Lütfen paylaşırken veya alıntı yaparken kaynağı belirtin. Önceden yazılı izin alınmadan ticari amaçla kullanılması yasaktır.",
+    fr: "Le contenu publié sur Al-Minbar est destiné à un usage personnel, éducatif et spirituel. Veuillez citer la source lors du partage ou de la citation. L'utilisation commerciale n'est pas autorisée sans autorisation écrite préalable.",
+    ur: "منبر پر شائع ہونے والا مواد ذاتی، تعلیمی اور روحانی استعمال کے لیے ہے۔ براہ کرم شیئر کرتے یا حوالہ دیتے وقت ماخذ کا ذکر کریں۔ پیشگی تحریری اجازت کے بغیر تجارتی استعمال کی اجازت نہیں ہے۔",
+    fa: "مطالب منتشر شده در منبر جمعه برای استفاده شخصی، آموزشی و معنوی در نظر گرفته شده است. لطفاً هنگام اشتراک‌گذاری یا نقل قول، منبع را ذکر کنید. استفاده تجاری بدون اجازه کتبی قبلی مجاز نیست.",
+  },
+};
+
 export function Home() {
   const [lang, setLang] = useState<Language | null>(() => {
     const saved = localStorage.getItem("minbar_lang") as Language;
@@ -107,6 +154,20 @@ export function Home() {
   const [adminPassword, setAdminPassword] = useState<string | null>(null);
   const [view, setView] = useState<View>("khutbah");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedKhutbah, setSelectedKhutbah] = useState<Khutbah | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [activePolicy, setActivePolicy] = useState<"privacy" | "terms" | null>(null);
+
+  const handleCopy = () => {
+    if (!currentKhutbah) return;
+    const title = currentKhutbah.title[lang as keyof typeof currentKhutbah.title] || currentKhutbah.title.ar;
+    const body = currentKhutbah.body[lang as keyof typeof currentKhutbah.body] || currentKhutbah.body.ar;
+    const textToCopy = `${title}\n\n${body}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   useEffect(() => {
     if (lang) {
@@ -124,8 +185,12 @@ export function Home() {
 
   const rtl = isRTL(lang);
   const aboutText = settings?.[`about${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof settings] as string;
-  const currentTitle = currentKhutbah?.title[lang as keyof typeof currentKhutbah.title];
-  const currentBody = currentKhutbah?.body[lang as keyof typeof currentKhutbah.body];
+  const currentTitle =
+    currentKhutbah?.title[lang as keyof typeof currentKhutbah.title] ||
+    currentKhutbah?.title.ar;
+  const currentBody =
+    currentKhutbah?.body[lang as keyof typeof currentKhutbah.body] ||
+    currentKhutbah?.body.ar;
   const archive = khutbahs?.filter((k) => k.id !== currentKhutbah?.id) || [];
   const filteredArchive = archive.filter((k) => {
     if (!searchQuery) return true;
@@ -206,8 +271,8 @@ export function Home() {
       {view === "khutbah" && (
         <main className="max-w-7xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Left sidebar */}
-            <aside className="lg:col-span-4 space-y-6">
+            {/* Left sidebar - order-2 on mobile so article appears first */}
+            <aside className="lg:col-span-4 space-y-6 order-2 lg:order-1">
               <div className="rounded-2xl p-7" style={{ background: "#f5f1ea", border: "1px solid rgba(196,200,188,0.4)" }}>
                 <h2 className="font-headline text-2xl font-bold mb-3" style={{ color: "#4a7c59" }}>
                   {rtl ? "منبر الجمعة" : "The Friday Pulpit"}
@@ -249,8 +314,8 @@ export function Home() {
 
             </aside>
 
-            {/* Right: parchment article */}
-            <article className="lg:col-span-8">
+            {/* Right: parchment article - order-1 on mobile */}
+            <article className="lg:col-span-8 order-1 lg:order-2">
               <div className="mb-6 flex justify-between items-end">
                 <div>
                   <span className="font-body text-xs font-bold uppercase tracking-widest" style={{ color: "#705c30" }}>
@@ -272,7 +337,7 @@ export function Home() {
                   </div>
                 </div>
               ) : currentKhutbah ? (
-                <div className="parchment-card rounded-2xl relative overflow-hidden" style={{ padding: "3rem" }}>
+                <div className="parchment-card rounded-2xl relative overflow-hidden p-6 sm:p-10 md:p-12">
                   <div className="absolute top-4 left-4 opacity-15 pointer-events-none">
                     <span className="material-symbols-outlined" style={{ fontSize: 32, color: "#c4a66a" }}>filter_vintage</span>
                   </div>
@@ -280,10 +345,25 @@ export function Home() {
                     <span className="material-symbols-outlined" style={{ fontSize: 32, color: "#c4a66a" }}>filter_vintage</span>
                   </div>
 
-                  <header className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 font-body text-xs font-bold" style={{ background: "#f8e0a8", color: "#554020" }}>
-                      {formatDate(currentKhutbah.date, lang)}
+                  <header className="text-center mb-10 relative">
+                    <div className="flex justify-between items-center mb-4">
+                      {/* Left space for alignment balance on desktop */}
+                      <div className="w-20 hidden sm:block" />
+                      
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-body text-xs font-bold" style={{ background: "#f8e0a8", color: "#554020" }}>
+                        {formatDate(currentKhutbah.date, lang)}
+                      </div>
+
+                      <button
+                        onClick={handleCopy}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-xs font-semibold border transition-all active:scale-95 shadow-sm hover:shadow"
+                        style={{ border: "1px solid #c4c8bc", color: "#4a7c59", background: "#f5f1ea" }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>content_copy</span>
+                        {copied ? (rtl ? "تم النسخ" : "Copied") : (rtl ? "نسخ" : "Copy")}
+                      </button>
                     </div>
+                    
                     <h2 className="font-headline text-2xl md:text-3xl font-bold italic leading-snug mb-5" style={{ color: "#4a7c59" }}>
                       {currentTitle}
                     </h2>
@@ -301,14 +381,14 @@ export function Home() {
                   <footer className="mt-12 pt-8 text-center" style={{ borderTop: "1px solid rgba(196,166,106,0.3)" }}>
                     <div className="flex flex-col items-center gap-3">
                       <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#4a7c59" }}>eco</span>
-                      <div className="flex gap-2">
-                        <button className="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style={{ border: "1px solid #c4c8bc" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#74796e" }}>share</span>
-                        </button>
-                        <button className="w-9 h-9 rounded-full flex items-center justify-center transition-colors" style={{ border: "1px solid #c4c8bc" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#74796e" }}>bookmark</span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={handleCopy}
+                        className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-body text-sm font-bold border transition-all active:scale-95 shadow-sm hover:shadow"
+                        style={{ border: "1px solid #c4c8bc", color: "#ffffff", background: "#4a7c59" }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
+                        {copied ? (rtl ? "تم نسخ نص الخطبة" : "Sermon Copied") : (rtl ? "نسخ نص الخطبة كاملاً" : "Copy Full Sermon")}
+                      </button>
                     </div>
                   </footer>
                 </div>
@@ -328,7 +408,7 @@ export function Home() {
       {/* ── Archive ── */}
       {view === "archive" && (
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8 min-h-screen">
-          <aside className="w-full md:w-56 flex-shrink-0">
+          <aside className="hidden md:block w-full md:w-56 flex-shrink-0">
             <div className="rounded-2xl p-5 sticky top-24" style={{ background: "#f0ece4" }}>
               <div className="mb-5 px-2">
                 <h2 className="font-headline text-base font-bold" style={{ color: "#4a7c59" }}>Al-Minbar</h2>
@@ -392,12 +472,16 @@ export function Home() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {filteredArchive.map((k) => {
-                  const title = k.title[lang as keyof typeof k.title];
-                  const body = k.body[lang as keyof typeof k.body];
+                  const title = k.title[lang as keyof typeof k.title] || k.title.ar;
+                  const body = k.body[lang as keyof typeof k.body] || k.body.ar;
                   const excerpt = body?.slice(0, 100) + "...";
                   const month = new Date(k.date).toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", { month: "long", year: "numeric" }).toUpperCase();
                   return (
-                    <div key={k.id} className="archive-card rounded-2xl p-6 flex flex-col justify-between min-h-52 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                    <div
+                      key={k.id}
+                      onClick={() => setSelectedKhutbah(k)}
+                      className="archive-card rounded-2xl p-6 flex flex-col justify-between min-h-52 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                    >
                       <div>
                         <p className="font-body text-xs font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.65)" }}>
                           {month}
@@ -488,17 +572,23 @@ export function Home() {
             </p>
           </div>
           <div className="flex gap-6 font-body text-xs" style={{ color: "#74796e" }}>
-            <span className="hover:text-[#4a7c59] transition-colors cursor-default">
-              {rtl ? "سياسة الخصوصية" : "Privacy Policy"}
-            </span>
-            <span className="hover:text-[#4a7c59] transition-colors cursor-default">
-              {rtl ? "شروط الاستخدام" : "Terms of Use"}
-            </span>
+            <button
+              onClick={() => setActivePolicy("privacy")}
+              className="hover:text-[#4a7c59] transition-colors"
+            >
+              {footerTranslations.privacy[lang]}
+            </button>
+            <button
+              onClick={() => setActivePolicy("terms")}
+              className="hover:text-[#4a7c59] transition-colors"
+            >
+              {footerTranslations.terms[lang]}
+            </button>
             <button
               onClick={() => setView("about")}
               className="hover:text-[#4a7c59] transition-colors"
             >
-              {rtl ? "تواصل معنا" : "Contact Us"}
+              {footerTranslations.contact[lang]}
             </button>
           </div>
           <p className="font-body text-xs" style={{ color: "#74796e" }}>
@@ -506,6 +596,116 @@ export function Home() {
           </p>
         </div>
       </footer>
+
+      {selectedKhutbah && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          style={{ background: "rgba(46,50,48,0.5)", backdropFilter: "blur(6px)" }}
+          onClick={() => setSelectedKhutbah(null)}
+        >
+          <div
+            className="parchment-card rounded-2xl relative w-full max-w-3xl max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 p-5 sm:p-8 md:p-10"
+            style={{ color: "#2e3230" }}
+            onClick={(e) => e.stopPropagation()}
+            dir={rtl ? "rtl" : "ltr"}
+          >
+            {/* Top Vintage Ornaments */}
+            <div className="absolute top-4 left-4 opacity-15 pointer-events-none">
+              <span className="material-symbols-outlined" style={{ fontSize: 32, color: "#c4a66a" }}>filter_vintage</span>
+            </div>
+            <div className="absolute top-4 right-4 opacity-15 pointer-events-none">
+              <span className="material-symbols-outlined" style={{ fontSize: 32, color: "#c4a66a" }}>filter_vintage</span>
+            </div>
+
+            {/* Close Button in corner */}
+            <button
+              onClick={() => setSelectedKhutbah(null)}
+              className="absolute top-4 w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
+              style={{ [rtl ? "left" : "right"]: "1rem", border: "1px solid rgba(196,166,106,0.3)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>close</span>
+            </button>
+
+            {/* Header / Meta */}
+            <header className="text-center mb-8 flex flex-col items-center">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 font-body text-xs font-bold" style={{ background: "#f8e0a8", color: "#554020" }}>
+                {formatDate(selectedKhutbah.date, lang)}
+              </div>
+              <h2 className="font-headline text-2xl md:text-3xl font-bold italic leading-snug mb-5 px-6" style={{ color: "#4a7c59" }}>
+                {selectedKhutbah.title[lang as keyof typeof selectedKhutbah.title] || selectedKhutbah.title.ar}
+              </h2>
+              <div className="w-20 h-0.5 mx-auto" style={{ background: "rgba(196,166,106,0.5)" }} />
+            </header>
+
+            {/* Scrollable Body Text */}
+            <div className="font-body text-base leading-relaxed space-y-5 overflow-y-auto pr-2" style={{ color: "#4a4e4a" }}>
+              {(selectedKhutbah.body[lang as keyof typeof selectedKhutbah.body] || selectedKhutbah.body.ar)?.split("\n\n").map((para: string, i: number) => (
+                <p key={i} className={i === 0 ? "drop-cap" : ""}>
+                  {para}
+                </p>
+              ))}
+            </div>
+
+            {/* Footer / Actions */}
+            <footer className="mt-8 pt-6 text-center flex flex-col items-center gap-4" style={{ borderTop: "1px solid rgba(196,166,106,0.3)" }}>
+              <button
+                onClick={() => setSelectedKhutbah(null)}
+                className="px-8 py-2.5 rounded-xl font-body font-bold text-sm transition-all shadow-sm hover:shadow active:scale-95"
+                style={{ background: "#4a7c59", color: "#ffffff" }}
+              >
+                {rtl ? "إغلاق" : "Close"}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
+
+      {activePolicy && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          style={{ background: "rgba(46,50,48,0.5)", backdropFilter: "blur(6px)" }}
+          onClick={() => setActivePolicy(null)}
+        >
+          <div
+            className="parchment-card rounded-2xl relative w-full max-w-lg animate-in fade-in zoom-in-95 duration-200 p-6 sm:p-8"
+            style={{ color: "#2e3230" }}
+            onClick={(e) => e.stopPropagation()}
+            dir={rtl ? "rtl" : "ltr"}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setActivePolicy(null)}
+              className="absolute top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
+              style={{ [rtl ? "left" : "right"]: "1rem", border: "1px solid rgba(196,166,106,0.3)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#74796e" }}>close</span>
+            </button>
+
+            <header className="mb-6">
+              <h2 className="font-headline text-xl font-bold" style={{ color: "#4a7c59" }}>
+                {activePolicy === "privacy" ? footerTranslations.privacy[lang] : footerTranslations.terms[lang]}
+              </h2>
+              <div className="w-12 h-0.5 mt-2" style={{ background: "rgba(196,166,106,0.5)" }} />
+            </header>
+
+            <div className="font-body text-sm leading-relaxed space-y-4" style={{ color: "#4a4e4a" }}>
+              <p>
+                {activePolicy === "privacy" ? policyContents.privacy[lang] : policyContents.terms[lang]}
+              </p>
+            </div>
+
+            <footer className="mt-8 pt-4 flex justify-end" style={{ borderTop: "1px solid rgba(196,166,106,0.3)" }}>
+              <button
+                onClick={() => setActivePolicy(null)}
+                className="px-6 py-2 rounded-xl font-body font-bold text-xs transition-all shadow-sm active:scale-95"
+                style={{ background: "#4a7c59", color: "#ffffff" }}
+              >
+                {rtl ? "موافق" : "Dismiss"}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
 
       {adminPassword && (
         <AdminPanel password={adminPassword} onClose={() => setAdminPassword(null)} />

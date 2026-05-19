@@ -90,7 +90,6 @@ overrides:
   esbuild>@esbuild/sunos-x64: '-'
   esbuild>@esbuild/win32-arm64: '-'
   esbuild>@esbuild/win32-ia32: '-'
-  esbuild>@esbuild/win32-x64: '-'
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
   esbuild>@esbuild/android-arm64: '-'
@@ -105,7 +104,6 @@ overrides:
   lightningcss>lightningcss-linux-arm64-musl: '-'
   lightningcss>lightningcss-linux-x64-musl: '-'
   lightningcss>lightningcss-win32-arm64-msvc: '-'
-  lightningcss>lightningcss-win32-x64-msvc: '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-android-arm64': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-darwin-arm64': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-darwin-x64': '-'
@@ -114,7 +112,6 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-arm64-gnu': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-arm64-musl': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
-  '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-x64-musl': '-'
   rollup>@rollup/rollup-android-arm-eabi: '-'
   rollup>@rollup/rollup-android-arm64: '-'
@@ -139,7 +136,6 @@ overrides:
   rollup>@rollup/rollup-win32-arm64-msvc: '-'
   rollup>@rollup/rollup-win32-ia32-msvc: '-'
   rollup>@rollup/rollup-win32-x64-gnu: '-'
-  rollup>@rollup/rollup-win32-x64-msvc: '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-freebsd-ia32': '-'
@@ -149,7 +145,6 @@ overrides:
   '@expo/ngrok-bin>@expo/ngrok-bin-linux-ia32': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-sunos-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-win32-ia32': '-'
-  '@expo/ngrok-bin>@expo/ngrok-bin-win32-x64': '-'
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   esbuild: 0.27.3
 
@@ -172,9 +167,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
-      '@workspace/integrations-anthropic-ai':
+      '@workspace/integrations-gemini-ai':
         specifier: workspace:*
-        version: link:../../lib/integrations-anthropic-ai
+        version: link:../../lib/integrations-gemini-ai
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -653,6 +648,12 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  lib/integrations-gemini-ai:
+    dependencies:
+      '@google/generative-ai':
+        specifier: ^0.21.0
+        version: 0.21.0
+
   scripts:
     devDependencies:
       '@types/node':
@@ -777,6 +778,12 @@ packages:
     cpu: [x64]
     os: [linux]
 
+  '@esbuild/win32-x64@0.27.3':
+    resolution: {integrity: sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA==}
+    engines: {node: '>=18'}
+    cpu: [x64]
+    os: [win32]
+
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
 
@@ -794,6 +801,10 @@ packages:
 
   '@gerrit0/mini-shiki@3.23.0':
     resolution: {integrity: sha512-bEMORlG0cqdjVyCEuU0cDQbORWX+kYCeo0kV1lbxF5bt4r7SID2l9bqsxJEM0zndaxpOUT7riCyIVEuqq/Ynxg==}
+
+  '@google/generative-ai@0.21.0':
+    resolution: {integrity: sha512-7XhUbtnlkSEZK15kN3t+tzIMxsbKm/dSkKBFalj+20NvPKe1kBY7mR2P7vuijEn+f06z5+A8bVGKO0v39cr6Wg==}
+    engines: {node: '>=18.0.0'}
 
   '@hookform/resolvers@3.10.0':
     resolution: {integrity: sha512-79Dv+3mDF7i+2ajj7SkypSKHhl1cbln1OGavqrsF7p6mbUv11xpqpacPsGDCTRvCSjEEIez2ef1NveSVL3b0Ag==}
@@ -1543,6 +1554,11 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@rollup/rollup-win32-x64-msvc@4.59.0':
+    resolution: {integrity: sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA==}
+    cpu: [x64]
+    os: [win32]
+
   '@scalar/helpers@0.2.18':
     resolution: {integrity: sha512-w1d4tpNEVZ293oB2BAgLrS0kVPUtG3eByNmOCJA5eK9vcT4D3cmsGtWjUaaqit0BQCsBFHK51rasGvSWnApYTw==}
     engines: {node: '>=20'}
@@ -1614,6 +1630,12 @@ packages:
       - '@tybys/wasm-util'
       - '@emnapi/wasi-threads'
       - tslib
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.1':
+    resolution: {integrity: sha512-rbO34G5sMWWyrN/idLeVxAZgAKWrn5LiR3/I90Q9MkA67s6T1oB0xtTe+0heoBvHSpbU9Mk7i6uwJnpo4u21XQ==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [win32]
 
   '@tailwindcss/oxide@4.2.1':
     resolution: {integrity: sha512-yv9jeEFWnjKCI6/T3Oq50yQEOqmpmpfzG1hcZsAOaXFQPfzWprWrlHSdGPEF3WQTi8zu8ohC9Mh9J470nT5pUw==}
@@ -2436,6 +2458,12 @@ packages:
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+
+  lightningcss-win32-x64-msvc@1.31.1:
+    resolution: {integrity: sha512-I9aiFrbd7oYHwlnQDqr1Roz+fTz61oDDJX7n9tYF9FJymH1cIN1DtKw3iYt6b8WZgEjoNwVSncwF4wx/ZedMhw==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [win32]
 
   lightningcss@1.31.1:
     resolution: {integrity: sha512-l51N2r93WmGUye3WuFoN5k10zyvrVs0qfKBhyC5ogUQ6Ew6JUSswh78mbSO+IU3nTWsyOArqPCcShdQSadghBQ==}
@@ -3347,6 +3375,9 @@ snapshots:
   '@esbuild/linux-x64@0.27.3':
     optional: true
 
+  '@esbuild/win32-x64@0.27.3':
+    optional: true
+
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
@@ -3371,6 +3402,8 @@ snapshots:
       '@shikijs/themes': 3.23.0
       '@shikijs/types': 3.23.0
       '@shikijs/vscode-textmate': 10.0.2
+
+  '@google/generative-ai@0.21.0': {}
 
   '@hookform/resolvers@3.10.0(react-hook-form@7.71.2(react@19.1.0))':
     dependencies:
@@ -4233,6 +4266,9 @@ snapshots:
   '@rollup/rollup-linux-x64-gnu@4.59.0':
     optional: true
 
+  '@rollup/rollup-win32-x64-msvc@4.59.0':
+    optional: true
+
   '@scalar/helpers@0.2.18': {}
 
   '@scalar/json-magic@0.11.7':
@@ -4308,10 +4344,14 @@ snapshots:
   '@tailwindcss/oxide-wasm32-wasi@4.2.1':
     optional: true
 
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.1':
+    optional: true
+
   '@tailwindcss/oxide@4.2.1':
     optionalDependencies:
       '@tailwindcss/oxide-linux-x64-gnu': 4.2.1
       '@tailwindcss/oxide-wasm32-wasi': 4.2.1
+      '@tailwindcss/oxide-win32-x64-msvc': 4.2.1
 
   '@tailwindcss/typography@0.5.19(tailwindcss@4.2.1)':
     dependencies:
@@ -4754,6 +4794,7 @@ snapshots:
   esbuild@0.27.3:
     optionalDependencies:
       '@esbuild/linux-x64': 0.27.3
+      '@esbuild/win32-x64': 0.27.3
 
   escalade@3.2.0: {}
 
@@ -5028,11 +5069,15 @@ snapshots:
   lightningcss-linux-x64-gnu@1.31.1:
     optional: true
 
+  lightningcss-win32-x64-msvc@1.31.1:
+    optional: true
+
   lightningcss@1.31.1:
     dependencies:
       detect-libc: 2.1.2
     optionalDependencies:
       lightningcss-linux-x64-gnu: 1.31.1
+      lightningcss-win32-x64-msvc: 1.31.1
 
   linkify-it@5.0.0:
     dependencies:
@@ -5474,6 +5519,7 @@ snapshots:
       '@types/estree': 1.0.8
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.59.0
+      '@rollup/rollup-win32-x64-msvc': 4.59.0
       fsevents: 2.3.3
 
   router@2.2.0:

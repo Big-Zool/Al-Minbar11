@@ -29,31 +29,41 @@ export function AdminPanel({ password, onClose }: { password: string; onClose: (
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex" style={{ background: "rgba(46,50,48,0.5)", backdropFilter: "blur(4px)" }}>
-      <div className="m-auto w-full max-w-5xl max-h-[92vh] flex rounded-2xl overflow-hidden shadow-2xl" style={{ background: "#faf6f0" }}>
+    <div className="fixed inset-0 z-50 flex p-0 sm:p-4" style={{ background: "rgba(46,50,48,0.5)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full h-full sm:h-auto sm:max-h-[92vh] m-auto max-w-5xl flex flex-col md:flex-row rounded-none sm:rounded-2xl overflow-hidden shadow-2xl" style={{ background: "#faf6f0" }}>
         {/* Sidebar */}
-        <aside className="w-52 flex-shrink-0 flex flex-col" style={{ background: "#f0ece4", borderRight: "1px solid #e4e0d8" }}>
-          <div className="px-5 pt-6 pb-4">
-            <h2 className="font-headline text-base font-bold" style={{ color: "#2e3230" }}>Admin Console</h2>
-            <p className="font-body text-xs" style={{ color: "#74796e" }}>Sermon Management System</p>
+        <aside className="w-full md:w-52 flex-shrink-0 flex flex-col border-b md:border-b-0 md:border-r" style={{ background: "#f0ece4", borderColor: "#e4e0d8" }}>
+          <div className="px-5 pt-4 pb-2 md:pt-6 md:pb-4 flex justify-between items-center md:block">
+            <div>
+              <h2 className="font-headline text-sm md:text-base font-bold" style={{ color: "#2e3230" }}>Admin Console</h2>
+              <p className="font-body text-[10px] md:text-xs hidden sm:block md:block" style={{ color: "#74796e" }}>Sermon Management System</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-body text-xs font-semibold"
+              style={{ color: "#b83230", border: "1px solid rgba(184,50,48,0.2)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#b83230" }}>logout</span>
+              Exit
+            </button>
           </div>
-          <nav className="flex-1 px-3 space-y-1">
+          <nav className="flex md:flex-col overflow-x-auto md:overflow-x-visible px-3 pb-3 md:pb-0 md:space-y-1 gap-1 md:gap-0 scrollbar-none">
             {nav.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveView(item.id)}
-                className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all font-body text-sm font-medium text-left"
+                className="flex-shrink-0 flex items-center gap-2 md:gap-3 rounded-xl px-3.5 py-2 md:py-2.5 transition-all font-body text-xs md:text-sm font-medium text-left"
                 style={activeView === item.id
                   ? { background: "#4a7c59", color: "#ffffff" }
                   : { color: "#4a4e4a" }
                 }
               >
-                <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: 18, color: activeView === item.id ? "#ffffff" : "#74796e" }}>{item.icon}</span>
-                {item.label}
+                <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: 16, color: activeView === item.id ? "#ffffff" : "#74796e" }}>{item.icon}</span>
+                <span className="whitespace-nowrap">{item.label}</span>
               </button>
             ))}
           </nav>
-          <div className="px-3 pb-4 mt-2" style={{ borderTop: "1px solid #e4e0d8", paddingTop: 12 }}>
+          <div className="hidden md:block px-3 pb-4 mt-2" style={{ borderTop: "1px solid #e4e0d8", paddingTop: 12 }}>
             <button
               onClick={onClose}
               className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all font-body text-sm font-medium"
@@ -155,6 +165,10 @@ function KhutbahForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ titleAr: formData.titleAr, bodyAr: formData.bodyAr, adminPassword: password }),
       });
+      if (!response.ok) {
+        const error = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(error?.error || "Translation failed");
+      }
       const res = await response.json();
       setFormData((prev) => ({
         ...prev,
@@ -162,8 +176,12 @@ function KhutbahForm({
         bodyEn: res.bodyEn, bodyTr: res.bodyTr, bodyFr: res.bodyFr, bodyUr: res.bodyUr, bodyFa: res.bodyFa,
       }));
       toast({ title: "Translation complete" });
-    } catch {
-      toast({ title: "Translation failed", variant: "destructive" });
+    } catch (error) {
+      toast({
+        title: "Translation failed",
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      });
     } finally {
       setTranslating(false);
     }
@@ -171,10 +189,20 @@ function KhutbahForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const options = {
+      onSuccess,
+      onError: (error: unknown) => {
+        toast({
+          title: initialData ? "Failed to update khutbah" : "Failed to publish khutbah",
+          description: error instanceof Error ? error.message : "Please check the form and try again.",
+          variant: "destructive",
+        });
+      },
+    };
     if (initialData) {
-      updateMutation.mutate({ id: initialData.id, data: formData }, { onSuccess });
+      updateMutation.mutate({ id: initialData.id, data: formData }, options);
     } else {
-      createMutation.mutate({ data: formData }, { onSuccess });
+      createMutation.mutate({ data: formData }, options);
     }
   };
 
@@ -184,8 +212,8 @@ function KhutbahForm({
   const labelStyle = { color: "#4a7c59" };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8">
-      <div className="flex items-center justify-between mb-7">
+    <form onSubmit={handleSubmit} className="p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
         <div>
           <h1 className="font-headline text-2xl font-bold" style={{ color: "#2e3230" }}>
             {initialData ? "Edit Khutbah" : "Add New Khutbah"}
@@ -195,16 +223,15 @@ function KhutbahForm({
           </p>
         </div>
         <label className="flex items-center gap-2.5 cursor-pointer select-none">
-          <div className="relative">
+          <div className="relative w-10 h-6">
             <input
               type="checkbox"
               className="sr-only peer"
               checked={formData.isCurrent}
               onChange={(e) => setFormData((p) => ({ ...p, isCurrent: e.target.checked }))}
             />
-            <div className="w-10 h-6 rounded-full transition-colors peer-checked:bg-[#4a7c59]" style={{ background: "#c4c8bc" }}>
-              <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform peer-checked:translate-x-4 shadow" />
-            </div>
+            <div className="w-full h-full rounded-full transition-colors bg-[#b83230] peer-checked:bg-[#4a7c59]" />
+            <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform peer-checked:translate-x-4 shadow" />
           </div>
           <span className="font-body text-sm" style={{ color: "#4a4e4a" }}>Set as Current</span>
         </label>
@@ -252,7 +279,7 @@ function KhutbahForm({
           />
         </div>
 
-        <div className="flex items-center justify-between rounded-xl p-5" style={{ background: "#f0e8db", border: "1px solid rgba(196,200,188,0.3)" }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl p-5" style={{ background: "#f0e8db", border: "1px solid rgba(196,200,188,0.3)" }}>
           <div>
             <h3 className="font-body font-bold text-sm" style={{ color: "#5e5548" }}>Automated Translation</h3>
             <p className="font-body text-xs mt-0.5" style={{ color: "#74796e" }}>
@@ -263,7 +290,7 @@ function KhutbahForm({
             type="button"
             onClick={handleTranslate}
             disabled={translating}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-bold text-sm transition-all active:scale-95 shadow-sm disabled:opacity-60"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-body font-bold text-sm transition-all active:scale-95 shadow-sm disabled:opacity-60"
             style={{ background: "#4a7c59", color: "#ffffff" }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>translate</span>
@@ -308,11 +335,11 @@ function KhutbahForm({
           ))}
         </div>
 
-        <div className="flex justify-end gap-3 pt-4" style={{ borderTop: "1px solid #e4e0d8" }}>
+        <div className="flex pt-4" style={{ borderTop: "1px solid #e4e0d8" }}>
           <button
             type="submit"
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="px-10 py-3 rounded-xl font-body font-bold text-sm transition-all active:scale-95 shadow-md disabled:opacity-60"
+            className="w-full sm:w-auto sm:ml-auto px-10 py-3 rounded-xl font-body font-bold text-sm transition-all active:scale-95 shadow-md disabled:opacity-60"
             style={{ background: "#4a7c59", color: "#ffffff" }}
           >
             {createMutation.isPending || updateMutation.isPending
@@ -329,6 +356,7 @@ function KhutbahForm({
 
 function ManageKhutbahs({ password }: { password: string }) {
   const { data: khutbahs, isLoading } = useListKhutbahs();
+  const updateMutation = useUpdateKhutbah();
   const deleteMutation = useDeleteKhutbah();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -336,7 +364,7 @@ function ManageKhutbahs({ password }: { password: string }) {
 
   if (editing) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <button
           onClick={() => setEditing(null)}
           className="flex items-center gap-2 font-body text-sm font-semibold mb-6 transition-colors"
@@ -360,7 +388,7 @@ function ManageKhutbahs({ password }: { password: string }) {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <SectionHeader title="Manage Sermons" subtitle="Edit or delete existing khutbahs." />
       {isLoading ? (
         <div className="space-y-3">
@@ -371,11 +399,11 @@ function ManageKhutbahs({ password }: { password: string }) {
           {khutbahs?.map((k) => (
             <div
               key={k.id}
-              className="flex items-center justify-between rounded-xl px-5 py-4"
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-xl px-5 py-4"
               style={{ background: "#f5f1ea", border: "1px solid rgba(196,200,188,0.4)" }}
             >
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <h4 className="font-body font-bold text-sm" style={{ color: "#2e3230" }}>
                     {k.title.en || k.title.ar}
                   </h4>
@@ -389,15 +417,34 @@ function ManageKhutbahs({ password }: { password: string }) {
                   {new Date(k.date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 w-full md:w-auto">
                 <button
                   onClick={() => setEditing(k)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-body text-xs font-semibold transition-all"
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-body text-xs font-semibold transition-all"
                   style={{ background: "#f0ece4", color: "#4a7c59", border: "1px solid #c4c8bc" }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>edit</span>
                   Edit
                 </button>
+                {!k.isCurrent && (
+                  <button
+                    onClick={() => {
+                      updateMutation.mutate({ id: k.id, data: { isCurrent: true } }, {
+                        onSuccess: () => {
+                          queryClient.invalidateQueries({ queryKey: getListKhutbahsQueryKey() });
+                          queryClient.invalidateQueries({ queryKey: getGetCurrentKhutbahQueryKey() });
+                          toast({ title: "Khutbah set as current" });
+                        },
+                      });
+                    }}
+                    disabled={updateMutation.isPending}
+                    className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-body text-xs font-semibold transition-all disabled:opacity-60"
+                    style={{ background: "#f0ece4", color: "#2e3230", border: "1px solid #c4c8bc" }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>check_circle</span>
+                    Set as Current
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     if (confirm("Delete this khutbah?")) {
@@ -409,7 +456,7 @@ function ManageKhutbahs({ password }: { password: string }) {
                       });
                     }
                   }}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-body text-xs font-semibold transition-all"
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg font-body text-xs font-semibold transition-all"
                   style={{ background: "#ffdad8", color: "#b83230" }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>delete</span>
@@ -444,7 +491,7 @@ function SettingsForm({ onSuccess }: { onSuccess?: () => void }) {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <SectionHeader title="Edit About Section" subtitle="Update the about text shown to visitors in each language." />
       <div className="space-y-4">
         {langs.map(({ key, label, rtl }) => (
@@ -460,11 +507,11 @@ function SettingsForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </div>
         ))}
-        <div className="flex justify-end pt-2">
+        <div className="flex pt-2">
           <button
             onClick={() => formData && updateMutation.mutate({ data: formData as any }, { onSuccess })}
             disabled={updateMutation.isPending}
-            className="px-8 py-3 rounded-xl font-body font-bold text-sm shadow-sm disabled:opacity-60 transition-all active:scale-95"
+            className="w-full sm:w-auto sm:ml-auto px-8 py-3 rounded-xl font-body font-bold text-sm shadow-sm disabled:opacity-60 transition-all active:scale-95"
             style={{ background: "#4a7c59", color: "#ffffff" }}
           >
             {updateMutation.isPending ? "Saving..." : "Save Settings"}
@@ -496,7 +543,7 @@ function PasswordForm({ password, onPasswordChanged }: { password: string; onPas
   };
 
   return (
-    <div className="p-8 max-w-sm">
+    <div className="p-4 sm:p-8 w-full max-w-sm">
       <SectionHeader title="Change Password" subtitle="Update your admin password." />
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

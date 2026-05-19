@@ -12,7 +12,7 @@ const LANGUAGES: { code: Language; name: string; label: string; dir?: "rtl" }[] 
 export function LanguageSelector({ onSelect }: { onSelect: (lang: Language) => void }) {
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
+      className="min-h-screen py-12 flex flex-col items-center justify-center relative overflow-y-auto"
       style={{
         background:
           "linear-gradient(180deg,#c97b6e 0%,#b86860 10%,#c47a6f 22%,#b96560 35%,#c47870 48%,#b86060 60%,#c07268 72%,#b96a62 84%,#c4796d 100%)",
@@ -53,7 +53,7 @@ export function LanguageSelector({ onSelect }: { onSelect: (lang: Language) => v
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mt-2 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2 w-full">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
@@ -84,7 +84,7 @@ export function LanguageSelector({ onSelect }: { onSelect: (lang: Language) => v
         </div>
       </div>
 
-      <footer className="absolute bottom-6 flex items-center gap-3 z-10">
+      <footer className="mt-12 mb-6 flex flex-wrap items-center justify-center gap-3 z-10 text-center px-4">
         <div className="h-px w-8" style={{ background: "rgba(255,255,255,0.4)" }} />
         <span
           className="material-symbols-outlined"
@@ -93,8 +93,8 @@ export function LanguageSelector({ onSelect }: { onSelect: (lang: Language) => v
           menu_book
         </span>
         <div className="h-px w-8" style={{ background: "rgba(255,255,255,0.4)" }} />
-        <span className="font-body text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
-          © 2024 Al-Minbar Sermons. All rights reserved.
+        <span className="font-body text-xs text-wrap" style={{ color: "rgba(255,255,255,0.6)" }}>
+          © 2026 Al-Minbar Sermons. All rights reserved.
         </span>
       </footer>
     </div>
