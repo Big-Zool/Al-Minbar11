@@ -118,6 +118,11 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
   });
+
+  if (process.env.VERCEL) {
+    await rm(path.resolve(artifactDir, "src"), { recursive: true, force: true });
+    await rm(path.resolve(artifactDir, "tsconfig.json"), { force: true });
+  }
 }
 
 buildAll().catch((err) => {
