@@ -10,18 +10,31 @@ try {
   initError = err;
 }
 
-const fallbackApp = express();
-fallbackApp.use((req, res) => {
-  res.status(500).json({
-    error: "Initialization Error",
-    message: initError ? initError.message : "Unknown error",
-    stack: initError ? initError.stack : null,
-  });
-});
-
 export default function handler(req, res) {
   if (initError || !app) {
-    return fallbackApp(req, res);
+    return res.status(500).json({
+      stage: "init",
+      message: initError?.message,
+      stack: initError?.stack,
+    });
   }
-  return app(req, res);
+
+  // Wrap request handling to catch synchronous crashes
+  try {
+    app(req, res, (err) => {
+      if (err) {
+        return res.status(500).json({
+          stage: "request",
+          message: err.message,
+          stack: err.stack,
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      stage: "request-sync",
+      message: err.message,
+      stack: err.stack,
+    });
+  }
 }
