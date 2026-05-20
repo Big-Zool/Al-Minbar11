@@ -201,7 +201,7 @@ export function Home() {
   const navLabel = (key: View) => rtl ? viewLabels[key].ar : viewLabels[key].en;
 
   return (
-    <div className="min-h-screen font-body" style={{ background: "#faf6f0", color: "#2e3230" }} dir={rtl ? "rtl" : "ltr"}>
+    <div className="min-h-screen flex flex-col font-body" style={{ background: "#faf6f0", color: "#2e3230" }} dir={rtl ? "rtl" : "ltr"}>
       {/* Top Navigation */}
       <header className="sticky top-0 z-40 shadow-sm" style={{ background: "#f5f1ea", borderBottom: "1px solid #e4e0d8" }}>
         <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4">
@@ -269,7 +269,7 @@ export function Home() {
 
       {/* ── Today's Khutbah ── */}
       {view === "khutbah" && (
-        <main className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Left sidebar - order-2 on mobile so article appears first */}
             <aside className="lg:col-span-4 space-y-6 order-2 lg:order-1">
@@ -407,7 +407,7 @@ export function Home() {
 
       {/* ── Archive ── */}
       {view === "archive" && (
-        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8 min-h-screen">
+        <div className="flex-1 w-full max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row gap-8">
           <aside className="hidden md:block w-full md:w-56 flex-shrink-0">
             <div className="rounded-2xl p-5 sticky top-24" style={{ background: "#f0ece4" }}>
               <div className="mb-5 px-2">
@@ -512,7 +512,7 @@ export function Home() {
 
       {/* ── About ── */}
       {view === "about" && (
-        <main className="max-w-3xl mx-auto px-6 py-16">
+        <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-16">
           <div className="text-center mb-12">
             <span className="material-symbols-outlined mb-4 block" style={{ fontSize: 48, color: "#4a7c59", fontVariationSettings: "'FILL' 1" }}>mosque</span>
             <h1 className="font-headline text-4xl font-bold" style={{ color: "#2e3230" }}>
