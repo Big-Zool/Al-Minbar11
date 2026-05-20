@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { AdminPanel } from "@/components/AdminPanel";
-import { Language, isRTL, formatDate } from "@/lib/language";
+import { Language, isRTL, formatDate, getLocale } from "@/lib/language";
 import { useGetSettings, useGetCurrentKhutbah, useListKhutbahs } from "@workspace/api-client-react";
 import type { Khutbah } from "@workspace/api-client-react";
 import { Input } from "@/components/ui/input";
@@ -9,95 +9,35 @@ import { Label } from "@/components/ui/label";
 
 type View = "khutbah" | "archive" | "about";
 
-function AdminLoginModal({ onLogin }: { onLogin: (password: string) => void }) {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("/api/admin/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const res = (await response.json()) as { valid: boolean };
-      if (res.valid) {
-        onLogin(password);
-        setOpen(false);
-        setPassword("");
-        setError(false);
-      } else {
-        setError(true);
-      }
-    } catch {
-      setError(true);
-    }
-  };
-
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="text-xs font-body flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:bg-[#f0ece4]"
-        style={{ color: "#74796e" }}
-      >
-        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>lock</span>
-        Admin
-      </button>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(46,50,48,0.4)", backdropFilter: "blur(4px)" }}>
-      <div className="w-full max-w-sm mx-4 rounded-2xl p-8 shadow-2xl" style={{ background: "#faf6f0", border: "1px solid #c4c8bc" }}>
-        <h2 className="font-headline text-2xl font-bold mb-1" style={{ color: "#2e3230" }}>Admin Login</h2>
-        <p className="font-body text-sm mb-6" style={{ color: "#74796e" }}>Enter your password to access the admin console.</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="font-body text-sm font-semibold" style={{ color: "#4a7c59" }}>Password</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl border-none font-body"
-              style={{ background: "#f0ece4" }}
-              autoFocus
-            />
-            {error && <p className="font-body text-xs" style={{ color: "#b83230" }}>Invalid password. Please try again.</p>}
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => { setOpen(false); setError(false); setPassword(""); }}
-              className="flex-1 py-2.5 rounded-xl font-body font-semibold text-sm transition-colors"
-              style={{ background: "#f0ece4", color: "#4a7c59" }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2.5 rounded-xl font-body font-bold text-sm transition-colors"
-              style={{ background: "#4a7c59", color: "#ffffff" }}
-            >
-              Sign In
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
 const langLabels: Record<Language, string> = {
   ar: "العربية", en: "English", tr: "Türkçe", fr: "Français", ur: "اردو", fa: "فارسی"
 };
 
-const viewLabels = {
-  khutbah: { en: "Khutbah", ar: "الخطبة" },
-  archive: { en: "Archive", ar: "الأرشيف" },
-  about: { en: "About", ar: "عن الموقع" },
+const viewLabels: Record<View, Record<Language, string>> = {
+  khutbah: {
+    ar: "الخطبة",
+    en: "Khutbah",
+    tr: "Hutbe",
+    fr: "Khoutbah",
+    ur: "خطبہ",
+    fa: "خطبه"
+  },
+  archive: {
+    ar: "الأرشيف",
+    en: "Archive",
+    tr: "Arşiv",
+    fr: "Archives",
+    ur: "آرکائیو",
+    fa: "آرشیو"
+  },
+  about: {
+    ar: "عن الموقع",
+    en: "About",
+    tr: "Hakkımızda",
+    fr: "À propos",
+    ur: "تعارف",
+    fa: "درباره ما"
+  },
 };
 
 const footerTranslations: Record<"privacy" | "terms" | "contact", Record<Language, string>> = {
@@ -146,6 +86,418 @@ const policyContents: Record<"privacy" | "terms", Record<Language, string>> = {
   },
 };
 
+const uiTranslations: Record<string, Record<Language, string>> = {
+  brandName: {
+    ar: "المنبر",
+    en: "Al-Minbar",
+    tr: "Al-Minbar",
+    fr: "Al-Minbar",
+    ur: "المنبر",
+    fa: "المنبر"
+  },
+  searchSermons: {
+    ar: "بحث في الخطب...",
+    en: "Search sermons...",
+    tr: "Hutbelerde ara...",
+    fr: "Rechercher des sermons...",
+    ur: "خطبات تلاش کریں...",
+    fa: "جستجو در خطبه‌ها..."
+  },
+  fridayPulpit: {
+    ar: "منبر الجمعة",
+    en: "The Friday Pulpit",
+    tr: "Cuma Minberi",
+    fr: "La Chaire du Vendredi",
+    ur: "جمعہ کا منبر",
+    fa: "منبر جمعه"
+  },
+  sidebarDesc: {
+    ar: "موقع خطب الجمعة للجامعة — نشر خطب الإمام الأسبوعية بست لغات لجميع أبناء المجتمع.",
+    en: "Al-Minbar serves as a sanctuary for reflection and spiritual growth. Preserving the wisdom of the Friday Khutbah for all.",
+    tr: "Al-Minbar, yansıma ve ruhsal büyüme için bir sığınak görevi görür. Cuma Hutbesi'nin hikmetini herkes için korur.",
+    fr: "Al-Minbar sert de sanctuaire pour la réflexion et la croissance spirituelle. Préserver la sagesse de la Khoutbah du vendredi pour tous.",
+    ur: "المنبر فکر اور روحانی ترقی کا ایک مرکز ہے۔ سب کے لیے خطبہ جمعہ کی حکمت کو محفوظ کرنا۔",
+    fa: "المنبر به عنوان پناهگاهی برای تفکر و رشد معنوی عمل می‌کند. حفظ حکمت خطبه جمعه برای همه."
+  },
+  weeklyWisdom: {
+    ar: "حكمة أسبوعية",
+    en: "Weekly Wisdom",
+    tr: "Haftalık Hikmet",
+    fr: "Sagesse Hebdomadaire",
+    ur: "ہفتہ وار حکمت",
+    fa: "حکمت هفتگی"
+  },
+  weeklyWisdomDesc: {
+    ar: "خطب مختارة بعناية كل جمعة",
+    en: "Carefully curated sermons every Jumu'ah.",
+    tr: "Her Cuma özenle seçilmiş hutbeler.",
+    fr: "Sermons soigneusement sélectionnés chaque Jumu'ah.",
+    ur: "ہر جمعہ کو احتیاط سے منتخب کردہ خطبات۔",
+    fa: "خطبه‌های با دقت انتخاب شده در هر جمعه."
+  },
+  globalReach: {
+    ar: "انتشار عالمي",
+    en: "Global Reach",
+    tr: "Küresel Erişim",
+    fr: "Portée Globale",
+    ur: "عالمی رسائی",
+    fa: "گسترش جهانی"
+  },
+  globalReachDesc: {
+    ar: "ترجمات بست لغات للجميع",
+    en: "Translations in 6 languages for inclusivity.",
+    tr: "Kapsayıcılık için 6 dilde çeviri.",
+    fr: "Des traductions en 6 langues pour l'inclusivité.",
+    ur: "شمولیت کے لیے 6 زبانوں میں ترجمہ۔",
+    fa: "ترجمه به ۶ زبان برای فراگیری بیشتر."
+  },
+  currentFeature: {
+    ar: "خطبة اليوم",
+    en: "Current Feature",
+    tr: "Günün Hutbesi",
+    fr: "À la Une",
+    ur: "آج کی خاص خصوصیت",
+    fa: "ویژگی فعلی"
+  },
+  todaysKhutbah: {
+    ar: "خطبة اليوم",
+    en: "Today's Khutbah",
+    tr: "Bugünün Hutbesi",
+    fr: "Khoutbah d'aujourd'hui",
+    ur: "آج کا خطبہ",
+    fa: "خطبه امروز"
+  },
+  copyText: {
+    ar: "نسخ",
+    en: "Copy",
+    tr: "Kopyala",
+    fr: "Copier",
+    ur: "کاپی کریں",
+    fa: "کپی"
+  },
+  copiedText: {
+    ar: "تم النسخ",
+    en: "Copied",
+    tr: "Kopyalandı",
+    fr: "Copie effectuée",
+    ur: "کاپی ہو گیا",
+    fa: "کپی شد"
+  },
+  copyFull: {
+    ar: "نسخ نص الخطبة كاملاً",
+    en: "Copy Full Sermon",
+    tr: "Tüm Hutbeyi Kopyala",
+    fr: "Copier le sermon complet",
+    ur: "مکمل خطبہ کاپی کریں",
+    fa: "کپی متن کامل خطبه"
+  },
+  copiedFull: {
+    ar: "تم نسخ نص الخطبة",
+    en: "Sermon Copied",
+    tr: "Hutbe Kopyalandı",
+    fr: "Sermon copié",
+    ur: "خطبہ کاپی ہو گیا",
+    fa: "خطبه کپی شد"
+  },
+  noCurrent: {
+    ar: "لا توجد خطبة حالية",
+    en: "No current khutbah available.",
+    tr: "Şu anda güncel hutbe bulunmamaktadır.",
+    fr: "Aucune khoutbah disponible pour le moment.",
+    ur: "فی الحال کوئی خطبہ دستیاب نہیں ہے۔",
+    fa: "در حال حاضر هیچ خطبه‌ای در دسترس نیست."
+  },
+  weeklySermons: {
+    ar: "خطب الجمعة الأسبوعية",
+    en: "Weekly Friday Sermons",
+    tr: "Haftalık Cuma Hutbeleri",
+    fr: "Sermons hebdomadaires du vendredi",
+    ur: "ہفتہ وار جمعہ کے خطبات",
+    fa: "خطبه‌های هفتگی جمعه"
+  },
+  archiveLabel: {
+    ar: "الأرشيف",
+    en: "Archive",
+    tr: "Arşiv",
+    fr: "Archives",
+    ur: "آرکائیو",
+    fa: "آرشیو"
+  },
+  aboutUs: {
+    ar: "عن الموقع",
+    en: "About Us",
+    tr: "Hakkımızda",
+    fr: "À propos de nous",
+    ur: "ہمارے بارے میں",
+    fa: "درباره ما"
+  },
+  archiveTitle: {
+    ar: "أرشيف الخطب",
+    en: "Khutbah Archive",
+    tr: "Hutbe Arşivi",
+    fr: "Archives des Khoutbahs",
+    ur: "خطبات کا آرکائیو",
+    fa: "آرشیو خطبه‌ها"
+  },
+  archiveSubtitle: {
+    ar: "تصفح مجموعة خطب الجمعة السابقة",
+    en: "Browse our collection of past Friday sermons.",
+    tr: "Geçmiş Cuma hutbeleri koleksiyonumuza göz atın.",
+    fr: "Parcourez notre collection de sermons de vendredi passés.",
+    ur: "پچھلے جمعہ کے خطبات کا ہمارا مجموعہ دیکھیں۔",
+    fa: "مجموعه خطبه‌های گذشته جمعه را مرور کنید."
+  },
+  archiveSearchPlaceholder: {
+    ar: "البحث حسب الموضوع أو العنوان...",
+    en: "Search by topic or title...",
+    tr: "Konu veya başlığa göre ara...",
+    fr: "Rechercher par sujet ou titre...",
+    ur: "موضوع یا عنوان سے تلاش کریں...",
+    fa: "جستجو بر اساس موضوع یا عنوان..."
+  },
+  noResults: {
+    ar: "لا توجد نتائج",
+    en: "No sermons found.",
+    tr: "Hutbe bulunamadı.",
+    fr: "Aucun sermon trouvé.",
+    ur: "کوئی خطبہ نہیں ملا۔",
+    fa: "هیچ خطبه‌ای پیدا نشد."
+  },
+  read: {
+    ar: "اقرأ",
+    en: "Read",
+    tr: "Oku",
+    fr: "Lire",
+    ur: "پڑھیں",
+    fa: "بخوانید"
+  },
+  aboutTitle: {
+    ar: "عن منبر الجمعة",
+    en: "About Al-Minbar",
+    tr: "Al-Minbar Hakkında",
+    fr: "À propos d'Al-Minbar",
+    ur: "المنبر کے بارے میں",
+    fa: "درباره المنبر"
+  },
+  aboutDesc: {
+    ar: "موقع خطب الجمعة للجامعة — نشر خطب الإمام الأسبوعية بست لغات لجميع أبناء المجتمع.",
+    en: "Al-Minbar is the University Friday Prayer website, publishing the Imam's weekly sermons in six languages to serve the entire community.",
+    tr: "Al-Minbar, tüm topluma hizmet etmek için İmam'ın haftalık hutbelerini altı dilde yayınlayan Üniversite Cuma Namazı web sitesidir.",
+    fr: "Al-Minbar est le site Web de la prière du vendredi de l'Université, publiant les sermons hebdomadaires de l'Imam en six langues pour servir toute la communauté.",
+    ur: "المنبر یونیورسٹی کی نماز جمعہ کی ویب سائٹ ہے، جو پوری کمیونٹی کی خدمت کے لیے امام کے ہفتہ وار خطبات کو چھ زبانوں میں شائع کرتی ہے۔",
+    fa: "المنبر وب‌سایت نماز جمعه دانشگاه است که خطبه‌های هفتگی امام را به شش زبان برای خدمت به کل جامعه منتشر می‌کند."
+  },
+  sixLanguages: {
+    ar: "٦ لغات",
+    en: "6 Languages",
+    tr: "6 Dil",
+    fr: "6 Langues",
+    ur: "6 زبانیں",
+    fa: "۶ زبان"
+  },
+  sixLanguagesSub: {
+    ar: "عربي، إنجليزي، تركي، فرنسي، أردو، فارسي",
+    en: "Arabic, English, Turkish, French, Urdu, Farsi",
+    tr: "Arapça, İngilizce, Türkçe, Fransızca, Urduca, Farsça",
+    fr: "Arabe, Anglais, Turc, Français, Ourdou, Persan",
+    ur: "عربی، انگریزی، ترکی، فرانسیسی، اردو، فارسی",
+    fa: "عربی، انگلیسی، ترکی، فرانسوی، اردو، فارسی"
+  },
+  weeklyUpdates: {
+    ar: "أسبوعياً",
+    en: "Weekly Updates",
+    tr: "Haftalık Güncellemeler",
+    fr: "Mises à jour hebdomadaires",
+    ur: "ہفتہ وار اپڈیٹس",
+    fa: "بروزرسانی‌های هفتگی"
+  },
+  weeklyUpdatesSub: {
+    ar: "خطبة جديدة كل جمعة",
+    en: "A new khutbah every Friday",
+    tr: "Her Cuma yeni bir hutbe",
+    fr: "Une nouvelle khoutbah chaque vendredi",
+    ur: "ہر جمعہ کو ایک نیا خطبہ",
+    fa: "یک خطبه جدید هر جمعه"
+  },
+  contactWithMe: {
+    ar: "تواصل معي",
+    en: "Contact with me",
+    tr: "Benimle iletişime geçin",
+    fr: "Contactez-moi",
+    ur: "مجھ سے رابطہ کریں",
+    fa: "با من تماس بگیرید"
+  },
+  portfolio: {
+    ar: "الموقع الشخصي",
+    en: "Portfolio",
+    tr: "Portföy",
+    fr: "Portfolio",
+    ur: "پورٹ فولیو",
+    fa: "پورتفولیو"
+  },
+  footerTagline: {
+    ar: "رفع الرسالة، تثبيت القلب",
+    en: "Elevating the message, anchoring the heart.",
+    tr: "Mesajı yüceltmek, kalbi sabitlemek.",
+    fr: "Élever le message, ancrer le cœur.",
+    ur: "پیغام کو بلند کرنا، دل کو مضبوط کرنا۔",
+    fa: "برافراشتن پیام، استوار ساختن دل."
+  },
+  close: {
+    ar: "إغلاق",
+    en: "Close",
+    tr: "Kapat",
+    fr: "Fermer",
+    ur: "بند کریں",
+    fa: "بستن"
+  },
+  dismiss: {
+    ar: "موافق",
+    en: "Dismiss",
+    tr: "Kapat",
+    fr: "Fermer",
+    ur: "خارج کریں",
+    fa: "رد کردن"
+  },
+  adminButton: {
+    ar: "الإدارة",
+    en: "Admin",
+    tr: "Yönetici",
+    fr: "Admin",
+    ur: "ایڈمن",
+    fa: "مدیریت"
+  },
+  adminLogin: {
+    ar: "دخول الإدارة",
+    en: "Admin Login",
+    tr: "Yönetici Girişi",
+    fr: "Connexion Admin",
+    ur: "ایڈمن لاگ ان",
+    fa: "ورود مدیر"
+  },
+  adminConsoleDesc: {
+    ar: "أدخل كلمة المرور للوصول إلى لوحة التحكم.",
+    en: "Enter your password to access the admin console.",
+    tr: "Yönetici paneline erişmek için şifrenizi girin.",
+    fr: "Entrez votre mot de passe pour accéder à la console d'administration.",
+    ur: "ایڈمن کنسول تک رسائی کے لیے اپنا پاس ورڈ درج کریں۔",
+    fa: "برای دسترسی به پنل مدیریت رمز عبور خود را وارد کنید."
+  },
+  passwordLabel: {
+    ar: "كلمة المرور",
+    en: "Password",
+    tr: "Şifre",
+    fr: "Mot de passe",
+    ur: "پاس ورڈ",
+    fa: "رمز عبور"
+  },
+  invalidPassword: {
+    ar: "كلمة مرور غير صحيحة. يرجى المحاولة مرة أخرى.",
+    en: "Invalid password. Please try again.",
+    tr: "Geçersiz şifre. Lütfen tekrar deneyin.",
+    fr: "Mot de passe invalide. Veuillez réessayer.",
+    ur: "غلط پاس ورڈ۔ براہ کرم دوبارہ کوشش کریں۔",
+    fa: "رمز عبور نامعتبر است. لطفاً دوباره تلاش کنید."
+  },
+  cancel: {
+    ar: "إلغاء",
+    en: "Cancel",
+    tr: "İptal",
+    fr: "Annuler",
+    ur: "منسوخ کریں",
+    fa: "لغو"
+  },
+  signIn: {
+    ar: "تسجيل الدخول",
+    en: "Sign In",
+    tr: "Giriş Yap",
+    fr: "Se connecter",
+    ur: "سائن ان کریں",
+    fa: "ورود"
+  }
+};
+
+function AdminLoginModal({ onLogin, lang }: { onLogin: (password: string) => void; lang: Language }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const res = (await response.json()) as { valid: boolean };
+      if (res.valid) {
+        onLogin(password);
+        setOpen(false);
+        setPassword("");
+        setError(false);
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="text-xs font-body flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all hover:bg-[#f0ece4]"
+        style={{ color: "#74796e" }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>lock</span>
+        {uiTranslations.adminButton[lang]}
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(46,50,48,0.4)", backdropFilter: "blur(4px)" }}>
+      <div className="w-full max-w-sm mx-4 rounded-2xl p-8 shadow-2xl" style={{ background: "#faf6f0", border: "1px solid #c4c8bc" }}>
+        <h2 className="font-headline text-2xl font-bold mb-1" style={{ color: "#2e3230" }}>{uiTranslations.adminLogin[lang]}</h2>
+        <p className="font-body text-sm mb-6" style={{ color: "#74796e" }}>{uiTranslations.adminConsoleDesc[lang]}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="font-body text-sm font-semibold" style={{ color: "#4a7c59" }}>{uiTranslations.passwordLabel[lang]}</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded-xl border-none font-body"
+              style={{ background: "#f0ece4" }}
+              autoFocus
+            />
+            {error && <p className="font-body text-xs" style={{ color: "#b83230" }}>{uiTranslations.invalidPassword[lang]}</p>}
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); setError(false); setPassword(""); }}
+              className="flex-1 py-2.5 rounded-xl font-body font-semibold text-sm transition-colors"
+              style={{ background: "#f0ece4", color: "#4a7c59" }}
+            >
+              {uiTranslations.cancel[lang]}
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-2.5 rounded-xl font-body font-bold text-sm transition-colors"
+              style={{ background: "#4a7c59", color: "#ffffff" }}
+            >
+              {uiTranslations.signIn[lang]}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export function Home() {
   const [lang, setLang] = useState<Language | null>(() => {
     const saved = localStorage.getItem("minbar_lang") as Language;
@@ -159,7 +511,7 @@ export function Home() {
   const [activePolicy, setActivePolicy] = useState<"privacy" | "terms" | null>(null);
 
   const handleCopy = () => {
-    if (!currentKhutbah) return;
+    if (!currentKhutbah || !lang) return;
     const title = currentKhutbah.title[lang as keyof typeof currentKhutbah.title] || currentKhutbah.title.ar;
     const body = currentKhutbah.body[lang as keyof typeof currentKhutbah.body] || currentKhutbah.body.ar;
     const textToCopy = `${title}\n\n${body}`;
@@ -198,7 +550,7 @@ export function Home() {
     return title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const navLabel = (key: View) => rtl ? viewLabels[key].ar : viewLabels[key].en;
+  const navLabel = (key: View) => viewLabels[key][lang] || viewLabels[key].en;
 
   return (
     <div className="min-h-screen flex flex-col font-body" style={{ background: "#faf6f0", color: "#2e3230" }} dir={rtl ? "rtl" : "ltr"}>
@@ -207,7 +559,7 @@ export function Home() {
         <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-headline text-xl font-bold" style={{ color: "#4a7c59" }}>
             <span className="material-symbols-outlined" style={{ color: "#4a7c59", fontSize: 22, fontVariationSettings: "'FILL' 1" }}>mosque</span>
-            Al-Minbar
+            {uiTranslations.brandName[lang]}
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -232,7 +584,7 @@ export function Home() {
               <input
                 className="font-body text-sm rounded-full border-none outline-none py-2 w-44 lg:w-56"
                 style={{ background: "#f0ece4", paddingLeft: rtl ? 12 : 32, paddingRight: rtl ? 32 : 12, color: "#2e3230" }}
-                placeholder={rtl ? "بحث في الخطب..." : "Search sermons..."}
+                placeholder={uiTranslations.searchSermons[lang]}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -245,7 +597,7 @@ export function Home() {
             >
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>language</span>
             </button>
-            <AdminLoginModal onLogin={setAdminPassword} />
+            <AdminLoginModal onLogin={setAdminPassword} lang={lang} />
           </div>
         </div>
 
@@ -275,12 +627,10 @@ export function Home() {
             <aside className="lg:col-span-4 space-y-6 order-2 lg:order-1">
               <div className="rounded-2xl p-7" style={{ background: "#f5f1ea", border: "1px solid rgba(196,200,188,0.4)" }}>
                 <h2 className="font-headline text-2xl font-bold mb-3" style={{ color: "#4a7c59" }}>
-                  {rtl ? "منبر الجمعة" : "The Friday Pulpit"}
+                  {uiTranslations.fridayPulpit[lang]}
                 </h2>
                 <p className="font-body text-sm leading-relaxed mb-6" style={{ color: "#4a4e4a" }}>
-                  {aboutText || (rtl
-                    ? "موقع خطب الجمعة للجامعة — نشر خطب الإمام الأسبوعية بست لغات"
-                    : "Al-Minbar serves as a sanctuary for reflection and spiritual growth. Preserving the wisdom of the Friday Khutbah for all.")}
+                  {aboutText || uiTranslations.sidebarDesc[lang]}
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
@@ -289,10 +639,10 @@ export function Home() {
                     </div>
                     <div>
                       <h4 className="font-body font-bold text-sm" style={{ color: "#2e3230" }}>
-                        {rtl ? "حكمة أسبوعية" : "Weekly Wisdom"}
+                        {uiTranslations.weeklyWisdom[lang]}
                       </h4>
                       <p className="font-body text-xs" style={{ color: "#74796e" }}>
-                        {rtl ? "خطب مختارة بعناية كل جمعة" : "Carefully curated sermons every Jumu'ah."}
+                        {uiTranslations.weeklyWisdomDesc[lang]}
                       </p>
                     </div>
                   </div>
@@ -302,10 +652,10 @@ export function Home() {
                     </div>
                     <div>
                       <h4 className="font-body font-bold text-sm" style={{ color: "#2e3230" }}>
-                        {rtl ? "انتشار عالمي" : "Global Reach"}
+                        {uiTranslations.globalReach[lang]}
                       </h4>
                       <p className="font-body text-xs" style={{ color: "#74796e" }}>
-                        {rtl ? "ترجمات بست لغات للجميع" : "Translations in 6 languages for inclusivity."}
+                        {uiTranslations.globalReachDesc[lang]}
                       </p>
                     </div>
                   </div>
@@ -319,10 +669,10 @@ export function Home() {
               <div className="mb-6 flex justify-between items-end">
                 <div>
                   <span className="font-body text-xs font-bold uppercase tracking-widest" style={{ color: "#705c30" }}>
-                    {rtl ? "خطبة اليوم" : "Current Feature"}
+                    {uiTranslations.currentFeature[lang]}
                   </span>
                   <h1 className="font-headline text-4xl md:text-5xl font-bold mt-1" style={{ color: "#2e3230" }}>
-                    {rtl ? "خطبة اليوم" : "Today's Khutbah"}
+                    {uiTranslations.todaysKhutbah[lang]}
                   </h1>
                 </div>
               </div>
@@ -360,7 +710,7 @@ export function Home() {
                         style={{ border: "1px solid #c4c8bc", color: "#4a7c59", background: "#f5f1ea" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 14 }}>content_copy</span>
-                        {copied ? (rtl ? "تم النسخ" : "Copied") : (rtl ? "نسخ" : "Copy")}
+                        {copied ? uiTranslations.copiedText[lang] : uiTranslations.copyText[lang]}
                       </button>
                     </div>
                     
@@ -387,7 +737,7 @@ export function Home() {
                         style={{ border: "1px solid #c4c8bc", color: "#ffffff", background: "#4a7c59" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
-                        {copied ? (rtl ? "تم نسخ نص الخطبة" : "Sermon Copied") : (rtl ? "نسخ نص الخطبة كاملاً" : "Copy Full Sermon")}
+                        {copied ? uiTranslations.copiedFull[lang] : uiTranslations.copyFull[lang]}
                       </button>
                     </div>
                   </footer>
@@ -396,7 +746,7 @@ export function Home() {
                 <div className="parchment-card rounded-2xl p-16 text-center">
                   <span className="material-symbols-outlined mb-4 block" style={{ fontSize: 48, color: "#c4c8bc" }}>menu_book</span>
                   <p className="font-body" style={{ color: "#74796e" }}>
-                    {rtl ? "لا توجد خطبة حالية" : "No current khutbah available."}
+                    {uiTranslations.noCurrent[lang]}
                   </p>
                 </div>
               )}
@@ -411,16 +761,16 @@ export function Home() {
           <aside className="hidden md:block w-full md:w-56 flex-shrink-0">
             <div className="rounded-2xl p-5 sticky top-24" style={{ background: "#f0ece4" }}>
               <div className="mb-5 px-2">
-                <h2 className="font-headline text-base font-bold" style={{ color: "#4a7c59" }}>Al-Minbar</h2>
+                <h2 className="font-headline text-base font-bold" style={{ color: "#4a7c59" }}>{uiTranslations.brandName[lang]}</h2>
                 <p className="font-body text-xs" style={{ color: "#74796e" }}>
-                  {rtl ? "خطب الجمعة الأسبوعية" : "Weekly Friday Sermons"}
+                  {uiTranslations.weeklySermons[lang]}
                 </p>
               </div>
               <nav className="space-y-1">
                 {[
-                  { icon: "menu_book", label: rtl ? "خطبة اليوم" : "Today's Khutbah", action: () => setView("khutbah") },
-                  { icon: "history", label: rtl ? "الأرشيف" : "Archive", active: true },
-                  { icon: "info", label: rtl ? "عن الموقع" : "About Us", action: () => setView("about") },
+                  { icon: "menu_book", label: uiTranslations.todaysKhutbah[lang], action: () => setView("khutbah") },
+                  { icon: "history", label: uiTranslations.archiveLabel[lang], active: true },
+                  { icon: "info", label: uiTranslations.aboutUs[lang], action: () => setView("about") },
                 ].map((item, i) => (
                   <button
                     key={i}
@@ -442,12 +792,10 @@ export function Home() {
           <section className="flex-grow">
             <div className="mb-8">
               <h1 className="font-headline text-3xl font-bold" style={{ color: "#2e3230" }}>
-                {rtl ? "أرشيف الخطب" : "Khutbah Archive"}
+                {uiTranslations.archiveTitle[lang]}
               </h1>
               <p className="font-body text-sm mt-2" style={{ color: "#74796e" }}>
-                {rtl
-                  ? "تصفح مجموعة خطب الجمعة السابقة"
-                  : "Browse our collection of past Friday sermons."}
+                {uiTranslations.archiveSubtitle[lang]}
               </p>
             </div>
 
@@ -456,7 +804,7 @@ export function Home() {
               <input
                 className="w-full font-body text-sm rounded-2xl border py-3 outline-none"
                 style={{ paddingLeft: rtl ? 14 : 44, paddingRight: rtl ? 44 : 14, background: "#ffffff", borderColor: "#c4c8bc", color: "#2e3230" }}
-                placeholder={rtl ? "البحث حسب الموضوع أو العنوان..." : "Search by topic or title..."}
+                placeholder={uiTranslations.archiveSearchPlaceholder[lang]}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -466,7 +814,7 @@ export function Home() {
               <div className="text-center py-20">
                 <span className="material-symbols-outlined mb-3 block" style={{ fontSize: 48, color: "#c4c8bc" }}>search_off</span>
                 <p className="font-body" style={{ color: "#74796e" }}>
-                  {rtl ? "لا توجد نتائج" : "No sermons found."}
+                  {uiTranslations.noResults[lang]}
                 </p>
               </div>
             ) : (
@@ -475,7 +823,7 @@ export function Home() {
                   const title = k.title[lang as keyof typeof k.title] || k.title.ar;
                   const body = k.body[lang as keyof typeof k.body] || k.body.ar;
                   const excerpt = body?.slice(0, 100) + "...";
-                  const month = new Date(k.date).toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", { month: "long", year: "numeric" }).toUpperCase();
+                  const month = new Date(k.date).toLocaleDateString(getLocale(lang), { month: "long", year: "numeric" }).toUpperCase();
                   return (
                     <div
                       key={k.id}
@@ -495,10 +843,10 @@ export function Home() {
                       </div>
                       <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
                         <span className="font-body text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
-                          {new Date(k.date).toLocaleDateString()}
+                          {new Date(k.date).toLocaleDateString(getLocale(lang))}
                         </span>
                         <span className="font-body text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.15)", color: "#ffffff" }}>
-                          {rtl ? "اقرأ" : "Read"}
+                          {uiTranslations.read[lang]}
                         </span>
                       </div>
                     </div>
@@ -516,19 +864,17 @@ export function Home() {
           <div className="text-center mb-12">
             <span className="material-symbols-outlined mb-4 block" style={{ fontSize: 48, color: "#4a7c59", fontVariationSettings: "'FILL' 1" }}>mosque</span>
             <h1 className="font-headline text-4xl font-bold" style={{ color: "#2e3230" }}>
-              {rtl ? "عن منبر الجمعة" : "About Al-Minbar"}
+              {uiTranslations.aboutTitle[lang]}
             </h1>
           </div>
           <div className="parchment-card rounded-2xl p-10">
             <p className="font-body text-base leading-relaxed" style={{ color: "#4a4e4a" }}>
-              {aboutText || (rtl
-                ? "موقع خطب الجمعة للجامعة — نشر خطب الإمام الأسبوعية بست لغات لجميع أبناء المجتمع."
-                : "Al-Minbar is the University Friday Prayer website, publishing the Imam's weekly sermons in six languages to serve the entire community.")}
+              {aboutText || uiTranslations.aboutDesc[lang]}
             </p>
             <div className="mt-8 grid grid-cols-2 gap-4">
               {[
-                { icon: "translate", label: rtl ? "٦ لغات" : "6 Languages", sub: rtl ? "عربي، إنجليزي، تركي، فرنسي، أردو، فارسي" : "Arabic, English, Turkish, French, Urdu, Farsi" },
-                { icon: "calendar_month", label: rtl ? "أسبوعياً" : "Weekly Updates", sub: rtl ? "خطبة جديدة كل جمعة" : "A new khutbah every Friday" },
+                { icon: "translate", label: uiTranslations.sixLanguages[lang], sub: uiTranslations.sixLanguagesSub[lang] },
+                { icon: "calendar_month", label: uiTranslations.weeklyUpdates[lang], sub: uiTranslations.weeklyUpdatesSub[lang] },
               ].map((item, i) => (
                 <div key={i} className="rounded-xl p-5" style={{ background: "#f0ece4" }}>
                   <span className="material-symbols-outlined mb-2 block" style={{ fontSize: 24, color: "#4a7c59" }}>{item.icon}</span>
@@ -541,7 +887,7 @@ export function Home() {
             <div className="mt-8 rounded-xl p-6" style={{ background: "#f0ece4", border: "1px solid rgba(196,200,188,0.4)" }}>
               <h3 className="font-body font-bold text-sm mb-4 flex items-center gap-2" style={{ color: "#4a7c59" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
-                {rtl ? "تواصل معي" : "Contact with me"}
+                {uiTranslations.contactWithMe[lang]}
               </h3>
               <div className="space-y-3">
                 <a href="mailto:bashmohandes04@gmail.com" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
@@ -554,7 +900,7 @@ export function Home() {
                 </a>
                 <a href="https://big-zool.github.io/portfolio" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 font-body text-sm hover:text-[#4a7c59] transition-colors" style={{ color: "#4a4e4a" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>web</span>
-                  {rtl ? "الموقع الشخصي" : "Portfolio"}
+                  {uiTranslations.portfolio[lang]}
                 </a>
               </div>
             </div>
@@ -566,9 +912,9 @@ export function Home() {
       <footer className="mt-16" style={{ borderTop: "1px solid #e4e0d8", background: "#f0ece4" }}>
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <div className="font-headline text-lg font-bold" style={{ color: "#705c30" }}>Al-Minbar</div>
+            <div className="font-headline text-lg font-bold" style={{ color: "#705c30" }}>{uiTranslations.brandName[lang]}</div>
             <p className="font-body text-xs" style={{ color: "#74796e" }}>
-              {rtl ? "رفع الرسالة، تثبيت القلب" : "Elevating the message, anchoring the heart."}
+              {uiTranslations.footerTagline[lang]}
             </p>
           </div>
           <div className="flex gap-6 font-body text-xs" style={{ color: "#74796e" }}>
@@ -653,7 +999,7 @@ export function Home() {
                 className="px-8 py-2.5 rounded-xl font-body font-bold text-sm transition-all shadow-sm hover:shadow active:scale-95"
                 style={{ background: "#4a7c59", color: "#ffffff" }}
               >
-                {rtl ? "إغلاق" : "Close"}
+                {uiTranslations.close[lang]}
               </button>
             </footer>
           </div>
@@ -700,7 +1046,7 @@ export function Home() {
                 className="px-6 py-2 rounded-xl font-body font-bold text-xs transition-all shadow-sm active:scale-95"
                 style={{ background: "#4a7c59", color: "#ffffff" }}
               >
-                {rtl ? "موافق" : "Dismiss"}
+                {uiTranslations.dismiss[lang]}
               </button>
             </footer>
           </div>
