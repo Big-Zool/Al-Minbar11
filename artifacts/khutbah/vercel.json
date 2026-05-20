@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://al-minbar11-api-server-2d24-awtvhn465-bigzools-projects.vercel.app/api/:path*"
+      "destination": "https://al-minbar11-api-server.vercel.app/api/:path*"
     },
     {
       "source": "/(.*)",
