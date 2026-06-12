@@ -344,7 +344,13 @@ components:
         reminderFr: { type: string }
         reminderUr: { type: string }
         reminderFa: { type: string }
-      required: [id, aboutAr, aboutEn, aboutTr, aboutFr, aboutUr, aboutFa, reminderAr, reminderEn, reminderTr, reminderFr, reminderUr, reminderFa]
+        reminderTitleAr: { type: string }
+        reminderTitleEn: { type: string }
+        reminderTitleTr: { type: string }
+        reminderTitleFr: { type: string }
+        reminderTitleUr: { type: string }
+        reminderTitleFa: { type: string }
+      required: [id, aboutAr, aboutEn, aboutTr, aboutFr, aboutUr, aboutFa, reminderAr, reminderEn, reminderTr, reminderFr, reminderUr, reminderFa, reminderTitleAr, reminderTitleEn, reminderTitleTr, reminderTitleFr, reminderTitleUr, reminderTitleFa]
 
     SettingsUpdate:
       type: object
@@ -361,6 +367,12 @@ components:
         reminderFr: { type: string }
         reminderUr: { type: string }
         reminderFa: { type: string }
+        reminderTitleAr: { type: string }
+        reminderTitleEn: { type: string }
+        reminderTitleTr: { type: string }
+        reminderTitleFr: { type: string }
+        reminderTitleUr: { type: string }
+        reminderTitleFa: { type: string }
         currentPassword: { type: string }
         newPassword: { type: string }
 

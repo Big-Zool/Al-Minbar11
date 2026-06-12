@@ -554,7 +554,16 @@ function ReminderSettingsForm({ onSuccess }: { onSuccess?: () => void }) {
       <div className="space-y-4">
         {langs.map(({ key, label, rtl }) => (
           <div key={key}>
-            <label className="font-body text-sm font-semibold mb-1.5 block" style={{ color: "#4a7c59" }}>{label}</label>
+            <label className="font-body text-sm font-semibold mb-1.5 block" style={{ color: "#4a7c59" }}>{label} Title</label>
+            <input
+              type="text"
+              className={inputCls}
+              style={{ ...inputStyle, marginBottom: "8px" }}
+              dir={rtl ? "rtl" : "ltr"}
+              value={formData?.[`reminderTitle${key}`] || ""}
+              onChange={(e) => setFormData((d) => ({ ...d!, [`reminderTitle${key}`]: e.target.value }))}
+            />
+            <label className="font-body text-sm font-semibold mb-1.5 block" style={{ color: "#4a7c59" }}>{label} Body</label>
             <textarea
               className={inputCls}
               style={{ ...inputStyle }}

@@ -726,7 +726,10 @@ export function Home() {
                       <span className="material-symbols-outlined text-[18px]">notifications_paused</span>
                     </div>
                     <span className="font-body font-bold text-sm">
-                      {uiTranslations.phoneAlertButton[lang]}
+                      {(() => {
+                        const titleVal = settings?.[`reminderTitle${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof settings] as string;
+                        return titleVal || uiTranslations.phoneAlertButton[lang];
+                      })()}
                     </span>
                   </div>
                   <span className="material-symbols-outlined opacity-60 transition-transform duration-300 group-hover:translate-x-[-4px]" style={{ transform: rtl ? "rotate(180deg)" : "none" }}>chevron_right</span>
@@ -1136,7 +1139,10 @@ export function Home() {
                 <span className="material-symbols-outlined text-[32px]" style={{ color: "#4a7c59" }}>do_not_disturb_on</span>
               </div>
               <h3 className="font-headline text-2xl font-bold" style={{ color: "#4a7c59" }}>
-                {uiTranslations.phoneAlertTitle[lang]}
+                {(() => {
+                  const titleVal = settings?.[`reminderTitle${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof settings] as string;
+                  return titleVal || uiTranslations.phoneAlertTitle[lang];
+                })()}
               </h3>
               <div className="w-12 h-0.5 mt-2" style={{ background: "rgba(196,166,106,0.5)" }} />
             </div>

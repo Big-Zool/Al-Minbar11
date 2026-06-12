@@ -247,6 +247,12 @@ export const GetSettingsResponse = zod.object({
   reminderFr: zod.string(),
   reminderUr: zod.string(),
   reminderFa: zod.string(),
+  reminderTitleAr: zod.string(),
+  reminderTitleEn: zod.string(),
+  reminderTitleTr: zod.string(),
+  reminderTitleFr: zod.string(),
+  reminderTitleUr: zod.string(),
+  reminderTitleFa: zod.string(),
 });
 
 /**
@@ -265,6 +271,12 @@ export const UpdateSettingsBody = zod.object({
   reminderFr: zod.string().optional(),
   reminderUr: zod.string().optional(),
   reminderFa: zod.string().optional(),
+  reminderTitleAr: zod.string().optional(),
+  reminderTitleEn: zod.string().optional(),
+  reminderTitleTr: zod.string().optional(),
+  reminderTitleFr: zod.string().optional(),
+  reminderTitleUr: zod.string().optional(),
+  reminderTitleFa: zod.string().optional(),
   currentPassword: zod.string().optional(),
   newPassword: zod.string().optional(),
 });
@@ -283,6 +295,12 @@ export const UpdateSettingsResponse = zod.object({
   reminderFr: zod.string(),
   reminderUr: zod.string(),
   reminderFa: zod.string(),
+  reminderTitleAr: zod.string(),
+  reminderTitleEn: zod.string(),
+  reminderTitleTr: zod.string(),
+  reminderTitleFr: zod.string(),
+  reminderTitleUr: zod.string(),
+  reminderTitleFa: zod.string(),
 });
 
 /**

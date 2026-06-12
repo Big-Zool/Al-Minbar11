@@ -17,6 +17,12 @@ export const settingsTable = pgTable("settings", {
   reminderFr: text("reminder_fr").notNull().default(""),
   reminderUr: text("reminder_ur").notNull().default(""),
   reminderFa: text("reminder_fa").notNull().default(""),
+  reminderTitleAr: text("reminder_title_ar").notNull().default(""),
+  reminderTitleEn: text("reminder_title_en").notNull().default(""),
+  reminderTitleTr: text("reminder_title_tr").notNull().default(""),
+  reminderTitleFr: text("reminder_title_fr").notNull().default(""),
+  reminderTitleUr: text("reminder_title_ur").notNull().default(""),
+  reminderTitleFa: text("reminder_title_fa").notNull().default(""),
 });
 
 export const insertSettingsSchema = createInsertSchema(settingsTable).omit({ id: true });
