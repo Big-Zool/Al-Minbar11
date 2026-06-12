@@ -14,4 +14,10 @@ export interface Settings {
   aboutFr: string;
   aboutUr: string;
   aboutFa: string;
+  reminderAr: string;
+  reminderEn: string;
+  reminderTr: string;
+  reminderFr: string;
+  reminderUr: string;
+  reminderFa: string;
 }

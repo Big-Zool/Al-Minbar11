@@ -414,6 +414,38 @@ const uiTranslations: Record<string, Record<Language, string>> = {
     fr: "Se connecter",
     ur: "سائن ان کریں",
     fa: "ورود"
+  },
+  phoneAlertButton: {
+    ar: "تنبيه: صمت هاتفك",
+    en: "Reminder: Silence your phone",
+    tr: "Hatırlatma: Telefonunuzu sessize alın",
+    fr: "Rappel : Silencieux sur votre téléphone",
+    ur: "تنبہ: اپنا فون خاموش رکھیں",
+    fa: "تذکر: تلفن خود را سایلنت کنید"
+  },
+  phoneAlertTitle: {
+    ar: "آداب الحضور",
+    en: "Etiquette of Attendance",
+    tr: "Katılım Adabı",
+    fr: "Étiquette de Présence",
+    ur: "حاضری کے آداب",
+    fa: "آداب حضور"
+  },
+  phoneAlertButtonClose: {
+    ar: "تم، جزاك الله خيراً",
+    en: "Understood, Jazakallah Khair",
+    tr: "Anlaşıldı, Cezâkellâhü Hayran",
+    fr: "Compris, Jazakallah Khair",
+    ur: "ٹھیک ہے، جزاک اللہ خیرا",
+    fa: "فهمیدم، جزاک الله خیراً"
+  },
+  phoneAlertWarningFooter: {
+    ar: "الرجاء جعل هاتفك في وضع الصامت",
+    en: "Please make your phone silent",
+    tr: "Lütfen telefonunuzu sessize alın",
+    fr: "Veuillez mettre votre téléphone en mode silencieux",
+    ur: "براہ کرم اپنے فون کو خاموش رکھیں",
+    fa: "لطفاً تلفن همراه خود را بی‌صدا کنید"
   }
 };
 
@@ -509,6 +541,7 @@ export function Home() {
   const [selectedKhutbah, setSelectedKhutbah] = useState<Khutbah | null>(null);
   const [copied, setCopied] = useState(false);
   const [activePolicy, setActivePolicy] = useState<"privacy" | "terms" | null>(null);
+  const [showPhoneReminderModal, setShowPhoneReminderModal] = useState(false);
 
   const handleCopy = () => {
     if (!currentKhutbah || !lang) return;
@@ -675,6 +708,29 @@ export function Home() {
                     {uiTranslations.todaysKhutbah[lang]}
                   </h1>
                 </div>
+              </div>
+
+              {/* Phone Silence Alert Button */}
+              <div className="mb-6">
+                <button
+                  onClick={() => setShowPhoneReminderModal(true)}
+                  className="w-full group relative overflow-hidden transition-all duration-300 rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow active:scale-95"
+                  style={{
+                    background: "rgba(74, 124, 89, 0.08)",
+                    border: "1px solid rgba(74, 124, 89, 0.2)",
+                    color: "#2a6038"
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-white p-2 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={{ background: "#4a7c59" }}>
+                      <span className="material-symbols-outlined text-[18px]">notifications_paused</span>
+                    </div>
+                    <span className="font-body font-bold text-sm">
+                      {uiTranslations.phoneAlertButton[lang]}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined opacity-60 transition-transform duration-300 group-hover:translate-x-[-4px]" style={{ transform: rtl ? "rotate(180deg)" : "none" }}>chevron_right</span>
+                </button>
               </div>
 
               {loadingCurrent ? (
@@ -1047,6 +1103,70 @@ export function Home() {
                 style={{ background: "#4a7c59", color: "#ffffff" }}
               >
                 {uiTranslations.dismiss[lang]}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
+
+      {showPhoneReminderModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          style={{ background: "rgba(46,50,48,0.5)", backdropFilter: "blur(6px)" }}
+          onClick={() => setShowPhoneReminderModal(false)}
+        >
+          <div
+            className="parchment-card rounded-2xl relative w-full max-w-lg flex flex-col animate-in fade-in zoom-in-95 duration-200 p-6 sm:p-8"
+            style={{ color: "#2e3230" }}
+            onClick={(e) => e.stopPropagation()}
+            dir={rtl ? "rtl" : "ltr"}
+          >
+            {/* Close Button in corner */}
+            <button
+              onClick={() => setShowPhoneReminderModal(false)}
+              className="absolute top-4 w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-black/5"
+              style={{ [rtl ? "left" : "right"]: "1rem", border: "1px solid rgba(196,166,106,0.3)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#74796e" }}>close</span>
+            </button>
+
+            {/* Header / Icon */}
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ background: "rgba(74, 124, 89, 0.1)" }}>
+                <span className="material-symbols-outlined text-[32px]" style={{ color: "#4a7c59" }}>do_not_disturb_on</span>
+              </div>
+              <h3 className="font-headline text-2xl font-bold" style={{ color: "#4a7c59" }}>
+                {uiTranslations.phoneAlertTitle[lang]}
+              </h3>
+              <div className="w-12 h-0.5 mt-2" style={{ background: "rgba(196,166,106,0.5)" }} />
+            </div>
+
+            {/* Content Body */}
+            <div className="font-body text-sm leading-relaxed space-y-4 overflow-y-auto max-h-[40vh] pr-2 text-center" style={{ color: "#4a4e4a" }}>
+              {(() => {
+                const textVal = settings?.[`reminder${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof settings] as string;
+                return textVal?.split("\n").map((para, i) => (
+                  <p key={i} className="whitespace-pre-line leading-relaxed">
+                    {para}
+                  </p>
+                ));
+              })()}
+              
+              <div className="pt-4 border-t" style={{ borderColor: "rgba(196,166,106,0.2)" }}>
+                <p className="font-bold text-[#b83230] text-sm animate-pulse">
+                  ⚠️ {uiTranslations.phoneAlertWarningFooter[lang]}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer / Confirm button */}
+            <footer className="mt-6 pt-4 text-center" style={{ borderTop: "1px solid rgba(196,166,106,0.2)" }}>
+              <button
+                onClick={() => setShowPhoneReminderModal(false)}
+                className="w-full py-3 rounded-xl font-body font-bold text-sm transition-all shadow-sm hover:shadow active:scale-95 text-white"
+                style={{ background: "#4a7c59" }}
+              >
+                {uiTranslations.phoneAlertButtonClose[lang]}
               </button>
             </footer>
           </div>

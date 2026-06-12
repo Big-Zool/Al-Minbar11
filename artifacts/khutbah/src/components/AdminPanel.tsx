@@ -14,7 +14,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import type { Khutbah, KhutbahInput } from "@workspace/api-client-react";
 
-type AdminView = "new" | "manage" | "about" | "password";
+type AdminView = "new" | "manage" | "about" | "alert" | "password";
 
 export function AdminPanel({ password, onClose }: { password: string; onClose: () => void }) {
   const [activeView, setActiveView] = useState<AdminView>("new");
@@ -25,6 +25,7 @@ export function AdminPanel({ password, onClose }: { password: string; onClose: (
     { id: "new", icon: "add_circle", label: "New Khutbah" },
     { id: "manage", icon: "list_alt", label: "Manage Sermons" },
     { id: "about", icon: "edit_note", label: "Edit About" },
+    { id: "alert", icon: "notifications_paused", label: "Edit Alert" },
     { id: "password", icon: "password", label: "Change Password" },
   ];
 
@@ -92,6 +93,12 @@ export function AdminPanel({ password, onClose }: { password: string; onClose: (
             <SettingsForm onSuccess={() => {
               queryClient.invalidateQueries({ queryKey: getGetSettingsQueryKey() });
               toast({ title: "Settings saved" });
+            }} />
+          )}
+          {activeView === "alert" && (
+            <ReminderSettingsForm onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: getGetSettingsQueryKey() });
+              toast({ title: "Reminder text updated" });
             }} />
           )}
           {activeView === "password" && <PasswordForm password={password} onPasswordChanged={onClose} />}
@@ -515,6 +522,57 @@ function SettingsForm({ onSuccess }: { onSuccess?: () => void }) {
             style={{ background: "#4a7c59", color: "#ffffff" }}
           >
             {updateMutation.isPending ? "Saving..." : "Save Settings"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReminderSettingsForm({ onSuccess }: { onSuccess?: () => void }) {
+  const { data: settings } = useGetSettings();
+  const updateMutation = useUpdateSettings();
+  const [formData, setFormData] = useState<Record<string, string> | null>(null);
+
+  if (settings && !formData) setFormData(settings as unknown as Record<string, string>);
+
+  const inputCls = "w-full rounded-xl font-body text-sm py-3 px-4 outline-none transition-all focus:ring-2 focus:ring-[#4a7c59]/20";
+  const inputStyle = { background: "#f0ece4", border: "none", color: "#2e3230", resize: "vertical" as const };
+
+  const langs = [
+    { key: "Ar", label: "Arabic", rtl: true },
+    { key: "En", label: "English" },
+    { key: "Tr", label: "Turkish" },
+    { key: "Fr", label: "French" },
+    { key: "Ur", label: "Urdu", rtl: true },
+    { key: "Fa", label: "Farsi", rtl: true },
+  ];
+
+  return (
+    <div className="p-4 sm:p-8">
+      <SectionHeader title="Edit Jumu'ah Phone Etiquette Alert" subtitle="Update the reminder text displayed inside the alert dialog for each language." />
+      <div className="space-y-4">
+        {langs.map(({ key, label, rtl }) => (
+          <div key={key}>
+            <label className="font-body text-sm font-semibold mb-1.5 block" style={{ color: "#4a7c59" }}>{label}</label>
+            <textarea
+              className={inputCls}
+              style={{ ...inputStyle }}
+              dir={rtl ? "rtl" : "ltr"}
+              rows={4}
+              value={formData?.[`reminder${key}`] || ""}
+              onChange={(e) => setFormData((d) => ({ ...d!, [`reminder${key}`]: e.target.value }))}
+            />
+          </div>
+        ))}
+        <div className="flex pt-2">
+          <button
+            onClick={() => formData && updateMutation.mutate({ data: formData as any }, { onSuccess })}
+            disabled={updateMutation.isPending}
+            className="w-full sm:w-auto sm:ml-auto px-8 py-3 rounded-xl font-body font-bold text-sm shadow-sm disabled:opacity-60 transition-all active:scale-95"
+            style={{ background: "#4a7c59", color: "#ffffff" }}
+          >
+            {updateMutation.isPending ? "Saving..." : "Save Reminder"}
           </button>
         </div>
       </div>

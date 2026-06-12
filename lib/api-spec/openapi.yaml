@@ -338,7 +338,13 @@ components:
         aboutFr: { type: string }
         aboutUr: { type: string }
         aboutFa: { type: string }
-      required: [id, aboutAr, aboutEn, aboutTr, aboutFr, aboutUr, aboutFa]
+        reminderAr: { type: string }
+        reminderEn: { type: string }
+        reminderTr: { type: string }
+        reminderFr: { type: string }
+        reminderUr: { type: string }
+        reminderFa: { type: string }
+      required: [id, aboutAr, aboutEn, aboutTr, aboutFr, aboutUr, aboutFa, reminderAr, reminderEn, reminderTr, reminderFr, reminderUr, reminderFa]
 
     SettingsUpdate:
       type: object
@@ -349,6 +355,12 @@ components:
         aboutFr: { type: string }
         aboutUr: { type: string }
         aboutFa: { type: string }
+        reminderAr: { type: string }
+        reminderEn: { type: string }
+        reminderTr: { type: string }
+        reminderFr: { type: string }
+        reminderUr: { type: string }
+        reminderFa: { type: string }
         currentPassword: { type: string }
         newPassword: { type: string }
 

@@ -13,6 +13,12 @@ export interface SettingsUpdate {
   aboutFr?: string;
   aboutUr?: string;
   aboutFa?: string;
+  reminderAr?: string;
+  reminderEn?: string;
+  reminderTr?: string;
+  reminderFr?: string;
+  reminderUr?: string;
+  reminderFa?: string;
   currentPassword?: string;
   newPassword?: string;
 }
