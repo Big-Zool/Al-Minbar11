@@ -155,89 +155,85 @@ export function AutoScrollWidget({ lang }: { lang: Language }) {
 
       {scroll.mode === "drawer" && (
         <div
-          className="w-[calc(100vw-3rem)] max-w-[410px] rounded-2xl overflow-hidden"
+          className="w-[calc(100vw-3rem)] max-w-[280px] rounded-2xl overflow-hidden"
           style={{ background: "#fffdf8", border: "1px solid #e4e0d8", boxShadow: "0 10px 30px rgba(46,50,48,0.22)" }}
         >
           <div className="w-full h-[3px]" style={{ background: "#eee9df" }}>
             <div className="h-full transition-all duration-150" style={{ width: `${scroll.progress * 100}%`, background: "#c4a66a" }} />
           </div>
 
-          <div className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-body text-sm font-bold" style={{ color: "#2e3230" }}>{t.scrollSpeed[lang]}</h3>
-                <p className="font-body text-xs" style={{ color: "#74796e" }}>
+          <div className="p-3.5 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-body text-[13px] font-bold leading-tight" style={{ color: "#2e3230" }}>{t.scrollSpeed[lang]}</h3>
+                <p className="font-body text-[11px]" style={{ color: "#74796e" }}>
                   {t.timeLeft[lang].replace("{time}", formatTime(scroll.secondsLeft))}
                 </p>
               </div>
-              <button
-                onClick={scroll.collapse}
-                aria-label={t.minimize[lang]}
-                title={t.minimize[lang]}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[#f5f1ea]"
-                style={{ color: "#74796e" }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>expand_more</span>
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between font-body text-xs" style={{ color: "#74796e" }}>
-                <span dir="ltr">{formatSpeed(MIN_SPEED)}</span>
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <span
-                  className="px-2 py-0.5 rounded font-bold"
+                  className="px-1.5 py-0.5 rounded font-body text-[11px] font-bold"
                   style={{ background: "#f5f1ea", border: "1px solid #e4e0d8", color: "#2a6038" }}
                   dir="ltr"
                 >
                   {formatSpeed(scroll.speed)}
                 </span>
-                <span dir="ltr">{formatSpeed(MAX_SPEED)}</span>
-              </div>
-              <div className="flex items-center gap-3">
                 <button
-                  onClick={() => scroll.setSpeed(scroll.speed - 0.1)}
-                  disabled={scroll.speed <= MIN_SPEED}
-                  aria-label={t.slower[lang]}
-                  className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center font-bold transition-colors hover:bg-[#f5f1ea] disabled:opacity-40 select-none"
-                  style={{ border: "1px solid #e4e0d8", color: "#2e3230" }}
+                  onClick={scroll.collapse}
+                  aria-label={t.minimize[lang]}
+                  title={t.minimize[lang]}
+                  className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-[#f5f1ea]"
+                  style={{ color: "#74796e" }}
                 >
-                  −
-                </button>
-                <Slider
-                  dir={rtl ? "rtl" : "ltr"}
-                  min={MIN_SPEED}
-                  max={MAX_SPEED}
-                  step={0.1}
-                  value={[scroll.speed]}
-                  onValueChange={([value]) => scroll.setSpeed(value)}
-                  aria-label={t.scrollSpeed[lang]}
-                />
-                <button
-                  onClick={() => scroll.setSpeed(scroll.speed + 0.1)}
-                  disabled={scroll.speed >= MAX_SPEED}
-                  aria-label={t.faster[lang]}
-                  className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center font-bold transition-colors hover:bg-[#f5f1ea] disabled:opacity-40 select-none"
-                  style={{ border: "1px solid #e4e0d8", color: "#2e3230" }}
-                >
-                  +
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>expand_more</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => scroll.setSpeed(scroll.speed - 0.1)}
+                disabled={scroll.speed <= MIN_SPEED}
+                aria-label={t.slower[lang]}
+                className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-colors hover:bg-[#f5f1ea] disabled:opacity-40 select-none"
+                style={{ border: "1px solid #e4e0d8", color: "#2e3230" }}
+              >
+                −
+              </button>
+              <Slider
+                dir={rtl ? "rtl" : "ltr"}
+                min={MIN_SPEED}
+                max={MAX_SPEED}
+                step={0.1}
+                value={[scroll.speed]}
+                onValueChange={([value]) => scroll.setSpeed(value)}
+                aria-label={t.scrollSpeed[lang]}
+              />
+              <button
+                onClick={() => scroll.setSpeed(scroll.speed + 0.1)}
+                disabled={scroll.speed >= MAX_SPEED}
+                aria-label={t.faster[lang]}
+                className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-colors hover:bg-[#f5f1ea] disabled:opacity-40 select-none"
+                style={{ border: "1px solid #e4e0d8", color: "#2e3230" }}
+              >
+                +
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
                 onClick={scroll.isScrolling && !scroll.isPaused ? scroll.pause : scroll.resume}
-                className="flex-1 py-2.5 rounded-xl font-body font-semibold text-sm text-white flex items-center justify-center gap-2 shadow-sm transition-all hover:brightness-95 active:scale-95"
+                className="flex-1 py-2 rounded-lg font-body font-semibold text-xs text-white flex items-center justify-center gap-1.5 shadow-sm transition-all hover:brightness-95 active:scale-95"
                 style={{ background: "#4a7c59" }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>
                   {scroll.isScrolling && !scroll.isPaused ? "pause" : "play_arrow"}
                 </span>
                 {scroll.isScrolling && !scroll.isPaused ? t.pause[lang] : t.resume[lang]}
               </button>
               <button
                 onClick={scroll.stop}
-                className="px-5 py-2.5 rounded-xl font-body font-semibold text-sm transition-colors hover:bg-[#f5f1ea]"
+                className="px-4 py-2 rounded-lg font-body font-semibold text-xs transition-colors hover:bg-[#f5f1ea]"
                 style={{ border: "1px solid #e4e0d8", color: "#2e3230" }}
               >
                 {t.stop[lang]}
