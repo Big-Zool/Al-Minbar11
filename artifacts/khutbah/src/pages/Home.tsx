@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { AdminPanel } from "@/components/AdminPanel";
+import { AutoScrollWidget } from "@/components/AutoScrollWidget";
 import { Language, isRTL, formatDate, getLocale } from "@/lib/language";
 import { useGetSettings, useGetCurrentKhutbah, useListKhutbahs } from "@workspace/api-client-react";
 import type { Khutbah } from "@workspace/api-client-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { copyToClipboard } from "@/lib/clipboard";
 
 type View = "khutbah" | "archive" | "about";
 
@@ -182,6 +184,14 @@ const uiTranslations: Record<string, Record<Language, string>> = {
     fr: "Copie effectuée",
     ur: "کاپی ہو گیا",
     fa: "کپی شد"
+  },
+  copyFailed: {
+    ar: "تعذّر النسخ",
+    en: "Copy failed",
+    tr: "Kopyalanamadı",
+    fr: "Échec de la copie",
+    ur: "کاپی نہیں ہو سکا",
+    fa: "کپی نشد"
   },
   copyFull: {
     ar: "نسخ نص الخطبة كاملاً",
@@ -539,7 +549,7 @@ export function Home() {
   const [view, setView] = useState<View>("khutbah");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKhutbah, setSelectedKhutbah] = useState<Khutbah | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
   const [activePolicy, setActivePolicy] = useState<"privacy" | "terms" | null>(null);
   const [showPhoneReminderModal, setShowPhoneReminderModal] = useState(false);
 
@@ -548,9 +558,9 @@ export function Home() {
     const title = currentKhutbah.title[lang as keyof typeof currentKhutbah.title] || currentKhutbah.title.ar;
     const body = currentKhutbah.body[lang as keyof typeof currentKhutbah.body] || currentKhutbah.body.ar;
     const textToCopy = `${title}\n\n${body}`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(textToCopy).then((ok) => {
+      setCopyState(ok ? "copied" : "failed");
+      setTimeout(() => setCopyState("idle"), 2000);
     });
   };
 
@@ -769,7 +779,7 @@ export function Home() {
                         style={{ border: "1px solid #c4c8bc", color: "#4a7c59", background: "#f5f1ea" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 14 }}>content_copy</span>
-                        {copied ? uiTranslations.copiedText[lang] : uiTranslations.copyText[lang]}
+                        {copyState === "copied" ? uiTranslations.copiedText[lang] : copyState === "failed" ? uiTranslations.copyFailed[lang] : uiTranslations.copyText[lang]}
                       </button>
                     </div>
                     
@@ -796,7 +806,7 @@ export function Home() {
                         style={{ border: "1px solid #c4c8bc", color: "#ffffff", background: "#4a7c59" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>content_copy</span>
-                        {copied ? uiTranslations.copiedFull[lang] : uiTranslations.copyFull[lang]}
+                        {copyState === "copied" ? uiTranslations.copiedFull[lang] : copyState === "failed" ? uiTranslations.copyFailed[lang] : uiTranslations.copyFull[lang]}
                       </button>
                     </div>
                   </footer>
@@ -813,6 +823,8 @@ export function Home() {
           </div>
         </main>
       )}
+
+      {view === "khutbah" && currentKhutbah && <AutoScrollWidget lang={lang} />}
 
       {/* ── Archive ── */}
       {view === "archive" && (
