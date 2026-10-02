@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type AutoScrollMode = "idle" | "active" | "drawer" | "finished";
 
-const BASE_PX_PER_SEC = 42;
-export const MIN_SPEED = 0.5;
+const BASE_PX_PER_SEC = 21;
+export const MIN_SPEED = 0.3;
 export const MAX_SPEED = 2.0;
 const BOTTOM_TOLERANCE_PX = 6;
 const BACK_TO_IDLE_PX = 100;
@@ -24,10 +24,10 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 /**
- * Hands-free reading: scrolls the window at 42px/s × speed and reports progress.
+ * Hands-free reading: scrolls the window at 21px/s × speed and reports progress.
  *
- * The position is kept as a float and applied with scrollTo. At 0.5× a frame
- * moves ~0.35px, and Chrome rounds a sub-pixel scrollBy to the device pixel
+ * The position is kept as a float and applied with scrollTo. At 0.3× a frame
+ * moves ~0.1px, and Chrome rounds a sub-pixel scrollBy to the device pixel
  * grid: measured on a 2× screen it moved 30px where 20px was asked, and on a
  * 1× screen the step can round to nothing. Accumulating keeps the speed true.
  */
