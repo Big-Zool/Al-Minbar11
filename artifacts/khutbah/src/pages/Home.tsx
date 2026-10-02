@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { AdminPanel } from "@/components/AdminPanel";
+import { AutoScrollWidget } from "@/components/AutoScrollWidget";
 import { Language, isRTL, formatDate, getLocale } from "@/lib/language";
 import { useGetSettings, useGetCurrentKhutbah, useListKhutbahs } from "@workspace/api-client-react";
 import type { Khutbah } from "@workspace/api-client-react";
@@ -813,6 +814,8 @@ export function Home() {
           </div>
         </main>
       )}
+
+      {view === "khutbah" && currentKhutbah && <AutoScrollWidget lang={lang} />}
 
       {/* ── Archive ── */}
       {view === "archive" && (
